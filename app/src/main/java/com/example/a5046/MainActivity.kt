@@ -5,25 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,12 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.ui.theme._5046Theme
 
-import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-
-
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             _5046Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    HomeScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -58,34 +37,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    _5046Theme {
-//        Greeting("Android")
-//    }
-//}
-
-
-
-@Composable
-fun LoginScreen()  {
+fun LoginScreen() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    Surface(
-        modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F7F5)
-    ) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F7F5)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(32.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -101,42 +60,39 @@ fun LoginScreen()  {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-            Text(
-                text = "Email",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Enter your email") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Password",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start).padding(top = 10.dp)
-            )
-
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = password,
-                onValueChange = { email = it },
+                onValueChange = { password = it },
                 label = { Text("Enter your password") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A915D))
             ) {
-                Text("Sign in", color = Color.White,fontSize = 18.sp)
+                Text("Sign in", color = Color.White, fontSize = 18.sp)
             }
-            Row (modifier = Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.Center){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text("Don't have an account? ")
                 Text(
                     text = "SIGN UP",
@@ -147,25 +103,18 @@ fun LoginScreen()  {
         }
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    _5046Theme {
-        LoginScreen()
-    }
-}
 
 @Composable
-fun RegisterScreen()  {
+fun RegisterScreen() {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    Surface(
-        modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F7F5)
-    ) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F7F5)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(32.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -176,67 +125,55 @@ fun RegisterScreen()  {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-            Text(
-                text = "Name",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start)
-            )
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Enter your name") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Email",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start).padding(top = 10.dp)
-            )
-
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Enter your email") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Password",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start).padding(top = 10.dp)
-            )
-
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Enter your password") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Confirm Password",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start).padding(top = 10.dp)
-            )
-
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Re-enter your password") },
                 singleLine = true,
-                modifier = Modifier.align(Alignment.Start).fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A915D))
             ) {
-                Text("Sign up", color = Color.White,fontSize = 18.sp)
+                Text("Sign up", color = Color.White, fontSize = 18.sp)
             }
-            Row (modifier = Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.Center){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text("Have an account ")
                 Text(
                     text = "SIGN IN",
@@ -248,6 +185,75 @@ fun RegisterScreen()  {
     }
 }
 
+@Composable
+fun HomeScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
+        Text(
+            text = "Hi, Deshui!",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF3A915D)
+        )
+        Text(
+            text = "Clayton, Melbourne",
+            fontSize = 16.sp,
+            color = Color(0xFF3E3E3E),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Reminder",
+                    tint = Color(0xFFFF9800),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(text = "Daily Reminder", fontWeight = FontWeight.Bold)
+                    Text(text = "Water your Snake Plant today.")
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(8.dp))
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            WeatherStat("Temperature", "25℃", Color(0xFF2E7D32), Modifier.weight(1f))
+            WeatherStat("Humidity", "60%", Color(0xFF388E3C), Modifier.weight(1f))
+            WeatherStat("Wind Speed", "15 km/h", Color(0xFF43A047), Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun WeatherStat(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = label, fontWeight = FontWeight.Bold)
+        Text(text = value, color = color, fontSize = 16.sp)
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun RegisterPreview() {
@@ -255,4 +261,3 @@ fun RegisterPreview() {
         RegisterScreen()
     }
 }
-
