@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -159,19 +160,19 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
-                            ) {}
+                            Image(
+                                painter = painterResource(id = R.drawable.temperature),
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Water your Snake Plant today.")
                         }
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
-                        ) {}
+                        Image(
+                            painter = painterResource(id = R.drawable.selected),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -205,11 +206,11 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 ) {
                     listOf("Temperature", "Humanity", "Wind Speed").forEach {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
-                            ) {}
+                            Image(
+                                painter = painterResource(id = R.drawable.temperature),
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
                             Text(text = it, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -226,26 +227,36 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .wrapContentHeight(),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column {
-                Box(
+            listOf(R.drawable.recommendation, R.drawable.recommendation).forEach {
+                Card(
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .border(1.dp, Color.LightGray)
-                ) {}
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("Heading", fontWeight = FontWeight.Bold)
-                    Text("Content")
+                        .weight(1f)
+                        .wrapContentHeight(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column {
+                        Image(
+                            painter = painterResource(id = it),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                        )
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text("Heading", fontWeight = FontWeight.Bold)
+                            Text("Content")
+                        }
+                    }
                 }
             }
         }
+
     }
 }
 
@@ -261,7 +272,6 @@ fun WeatherStat(label: String, value: String, color: Color, modifier: Modifier =
 }
 
 data class NavRoute(val route: String, val iconResId: Int, val label: String)
-
 
 
 
