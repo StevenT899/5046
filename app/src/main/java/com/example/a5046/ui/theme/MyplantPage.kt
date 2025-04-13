@@ -1,6 +1,7 @@
 package com.example.a5046.ui.theme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,80 +67,95 @@ fun CustomPlantCard() {
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_card_1),
-                contentDescription = "plant picture",
-                modifier = Modifier.size(160.dp),
-                tint = Color.Unspecified
+        Row(modifier = Modifier.background(MaterialTheme.colorScheme.surface))
+        {
+            Row(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
             )
-            Spacer(modifier = Modifier.width(15.dp))
-            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                Text(
-                    text = "Peperomia Ginny",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
+            {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_card_1),
+                    contentDescription = "plant picture",
+                    modifier = Modifier.size(160.dp),
+                    tint = Color.Unspecified
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "A easy-care plant with pink-edged leaves.",
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
-                    color = MaterialTheme.colorScheme.onSurface
+                Spacer(modifier = Modifier.width(15.dp))
+                Column(modifier = Modifier.fillMaxWidth(0.88f).padding(top = 8.dp)) {
+                    Text(
+                        text = "Peperomia Ginny",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "A easy-care plant with pink-edged leaves.",
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_sunlight),
+                            contentDescription = "光照图标",
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.Unspecified
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Avoid direct sunlight",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // 温度信息
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_temperature),
+                            contentDescription = "温度图标",
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.Unspecified
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "18°C - 26°C",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // 浇水信息
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_water),
+                            contentDescription = "浇水图标",
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.Unspecified
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Every 8 days",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Icon(
+                    painter = painterResource(id = R.drawable.close),
+                    contentDescription = "Close",
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(6.dp)
+                        .align(Alignment.Top)
+                        .clickable {
+                            //click function
+                        },
+                    tint = Color.Unspecified
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_sunlight),
-                        contentDescription = "光照图标",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Avoid direct sunlight",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                // 温度信息
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_temperature),
-                        contentDescription = "温度图标",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "18°C - 26°C",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                // 浇水信息
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_water),
-                        contentDescription = "浇水图标",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Every 8 days",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
             }
         }
     }
