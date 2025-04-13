@@ -38,14 +38,81 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             _5046Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(modifier = Modifier.padding(innerPadding))
-                }
                 BottomNavigationBar()
             }
         }
     }
 }
+@Composable
+fun BottomNavigationBar() {
+    val navRoutes = listOf(
+        NavRoute("home", R.drawable.homeicon, "Home"),
+        NavRoute("plant", R.drawable.myplanticon, "My Plant"),
+        NavRoute("form", R.drawable.formicon, "Form"),
+        NavRoute("report", R.drawable.reporticon, "Report"),
+    )
+
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigation(
+                modifier = Modifier.padding(bottom = 0.dp),
+                backgroundColor = Color.White
+            ) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                navRoutes.forEach { navRoute ->
+                    BottomNavigationItem(
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = navRoute.iconResId),
+                                contentDescription = navRoute.label,
+                                tint = if (currentDestination?.route == navRoute.route)
+                                    Color(0xFF3A915D)
+                                else
+                                    Color.Gray
+                            )
+                        },
+                        selected = currentDestination?.route == navRoute.route,
+                        onClick = {
+                            navController.navigate(navRoute.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        alwaysShowLabel = false
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable("home") { HomeScreen() }
+            composable("plant") { MyPlant() }
+            composable("form") { Formscreen() }
+            composable("report") { Reportscreen() }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NavPreview() {
+    _5046Theme {
+        BottomNavigationBar()
+    }
+}
+
+
+
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
@@ -195,73 +262,7 @@ fun WeatherStat(label: String, value: String, color: Color, modifier: Modifier =
 
 data class NavRoute(val route: String, val iconResId: Int, val label: String)
 
-@Composable
-fun BottomNavigationBar() {
-    val navRoutes = listOf(
-        NavRoute("home", R.drawable.homeicon, "Home"),
-        NavRoute("plant", R.drawable.myplanticon, "My Plant"),
-        NavRoute("form", R.drawable.formicon, "Form"),
-        NavRoute("report", R.drawable.reporticon, "Report"),
-    )
 
-    val navController = rememberNavController()
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigation(
-                modifier = Modifier.padding(bottom = 0.dp),
-                backgroundColor = Color.White
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                navRoutes.forEach { navRoute ->
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = navRoute.iconResId),
-                                contentDescription = navRoute.label,
-                                tint = if (currentDestination?.route == navRoute.route)
-                                    Color(0xFF3A915D)
-                                else
-                                    Color.Gray
-                            )
-                        },
-                        selected = currentDestination?.route == navRoute.route,
-                        onClick = {
-                            navController.navigate(navRoute.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    inclusive = false
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        alwaysShowLabel = false
-                    )
-                }
-            }
-        }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable("home") { HomeScreen() }
-            composable("plant") { MyPlant() }
-            composable("form") { Formscreen() }
-            composable("report") { Reportscreen() }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NavPreview() {
-    _5046Theme {
-        BottomNavigationBar()
-    }
-}
 
 
 //@Preview(showBackground = true)
