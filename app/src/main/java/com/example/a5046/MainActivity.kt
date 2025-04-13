@@ -8,8 +8,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,37 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.a5046.ui.theme._5046Theme
-
-import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-
-import com.example.a5046.ui.theme.Home
-
-
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.BottomNavigation
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.BottomNavigationItem
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Info
-
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.getValue
-import com.example.a5046.ui.theme.Formscreen
-import com.example.a5046.ui.theme.MyPlant
-import com.example.a5046.ui.theme.Reportscreen
-
+import com.example.a5046.ui.theme.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +46,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
@@ -89,29 +66,45 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             color = Color(0xFF3E3E3E),
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F8)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(0.5f)
+                    .wrapContentHeight()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Reminder",
-                    tint = Color(0xFFFF9800),
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(text = "Daily Reminder", fontWeight = FontWeight.Bold)
-                    Text(text = "Water your Snake Plant today.")
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Reminder",
+                        tint = Color(0xFFFF9800),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.Top)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Text(
+                            text = "Daily Reminder",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                        Text(
+                            text = "Water your\nSnake Plant today."
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.weight(0.5f))
+
         }
         Spacer(modifier = Modifier.height(24.dp))
         Row(
@@ -125,6 +118,31 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             WeatherStat("Humidity", "60%", Color(0xFF388E3C), Modifier.weight(1f))
             WeatherStat("Wind Speed", "15 km/h", Color(0xFF43A047), Modifier.weight(1f))
         }
+        Spacer(modifier = Modifier.height(32.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Plants stats",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            Text(
+                text = "See Details",
+                color = Color(0xFF3A915D),
+                fontWeight = FontWeight.Medium
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Image(
+            painter = painterResource(id = R.drawable.graphstat),
+            contentDescription = "Graph",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        )
     }
 }
 
@@ -138,7 +156,6 @@ fun WeatherStat(label: String, value: String, color: Color, modifier: Modifier =
         Text(text = value, color = color, fontSize = 16.sp)
     }
 }
-
 
 data class NavRoute(val route: String, val iconResId: Int, val label: String)
 
@@ -157,7 +174,7 @@ fun BottomNavigationBar() {
         bottomBar = {
             BottomNavigation(
                 modifier = Modifier.padding(bottom = 0.dp),
-                backgroundColor = Color.White // 设置背景为白色
+                backgroundColor = Color.White
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -183,7 +200,7 @@ fun BottomNavigationBar() {
                                 restoreState = true
                             }
                         },
-                        alwaysShowLabel = false // 不显示文字标签
+                        alwaysShowLabel = false
                     )
                 }
             }
@@ -194,7 +211,7 @@ fun BottomNavigationBar() {
             startDestination = "home",
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("home") { Home() }
+            composable("home") { HomeScreen() }
             composable("plant") { MyPlant() }
             composable("form") { Formscreen() }
             composable("report") { Reportscreen() }
