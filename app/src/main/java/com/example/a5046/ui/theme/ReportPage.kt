@@ -21,18 +21,15 @@ import androidx.compose.ui.unit.sp
 import com.example.a5046.R
 
 @Composable
-fun ReportScreen() {
+fun ReportScreen(modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFF1F6F4)
+        modifier = modifier.fillMaxSize(),
+        color = Color(0xFFF1F7F5)
     ) {
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
-                .fillMaxWidth()
-                .widthIn(max = 600.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Report",
@@ -73,7 +70,6 @@ private fun FrequencyCard() {
                 color = Color(0xFF9EA0A5)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

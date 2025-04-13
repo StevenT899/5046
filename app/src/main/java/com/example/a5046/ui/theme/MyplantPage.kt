@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.R
@@ -32,27 +33,23 @@ import com.example.a5046.R
 @Composable
 fun MyPlant() {
     Surface(
-        modifier = Modifier.fillMaxSize(), // 修改此处
-        color = Color(0xFFF1F6F4)
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF1F7F5)
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
-                .fillMaxWidth()
-                .widthIn(max = 600.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "My Plant",
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                    .fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
             ) {
                 CustomPlantCard()
@@ -64,26 +61,24 @@ fun MyPlant() {
 @Composable
 fun CustomPlantCard() {
     Card(
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp)
         ) {
-            // 左侧大图：这里使用的是来自Figma导出的图片
+
             Icon(
                 painter = painterResource(id = R.drawable.ic_card_1),
                 contentDescription = "plant picture",
-                modifier = Modifier.size(130.dp),
+                modifier = Modifier.size(160.dp),
                 tint = Color.Unspecified
             )
             Spacer(modifier = Modifier.width(15.dp))
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                 Text(
                     text = "Peperomia Ginny",
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -94,7 +89,7 @@ fun CustomPlantCard() {
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "A easy-care plant with pink-edged leaves, perfect for...",
+                    text = "A easy-care plant with pink-edged leaves.",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -147,5 +142,13 @@ fun CustomPlantCard() {
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PlantScreenPreview() {
+    _5046Theme {
+        MyPlant()
     }
 }

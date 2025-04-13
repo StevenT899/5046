@@ -15,12 +15,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
 
 @Composable
-fun Formscreen(modifier: Modifier = Modifier) {
+fun FormScreen(modifier: Modifier = Modifier) {
 
     var plantName by remember { mutableStateOf("") }
     var plantingDate by remember { mutableStateOf("") }
@@ -35,14 +36,12 @@ fun Formscreen(modifier: Modifier = Modifier) {
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = Color(0xFFF1F6F4)
+        color = Color(0xFFF1F7F5)
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
-                .fillMaxWidth()
-                .widthIn(max = 600.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Add Plant",
@@ -52,6 +51,30 @@ fun Formscreen(modifier: Modifier = Modifier) {
             )
 
             Spacer(modifier = Modifier.height(18.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .padding(bottom = 14.dp)
+                    .clickable { /* 模拟点击上传 */ },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE1EFE7)) // 浅绿色背景
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "+ Add Plant Photo",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF3A915D)
+                    )
+                }
+            }
 
             FormLabel("Plant Name")
             StyledTextField(plantName) { plantName = it }
@@ -93,14 +116,12 @@ fun Formscreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* Save Logic */ },
-                modifier = Modifier
-                    .width(160.dp)
-                    .height(48.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00A86B))
+                onClick = {},
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A915D))
             ) {
-                Text("Submit", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Submit", color = Color.White,fontSize = 18.sp)
             }
         }
     }
@@ -231,5 +252,14 @@ fun DatePickerField(
         ).apply {
             setOnDismissListener { showDialog = false }
         }.show()
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun FormScreenPreview() {
+    _5046Theme {
+        FormScreen()
     }
 }
