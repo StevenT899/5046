@@ -99,7 +99,7 @@ fun BottomNavigationBar() {
             composable("home") { HomeScreen() }
             composable("plant") { MyPlant() }
             composable("form") { Formscreen() }
-            composable("report") { Reportscreen() }
+            composable("report") { ReportScreen()}
         }
     }
 }
