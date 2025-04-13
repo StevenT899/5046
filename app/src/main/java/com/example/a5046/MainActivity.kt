@@ -66,83 +66,119 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             color = Color(0xFF3E3E3E),
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F8)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                modifier = Modifier
-                    .weight(0.5f)
-                    .wrapContentHeight()
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
+
+        // Reminder Section
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F9FB))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
-                        contentDescription = "Reminder",
+                        contentDescription = null,
                         tint = Color(0xFFFF9800),
-                        modifier = Modifier
-                            .size(20.dp)
-                            .align(Alignment.Top)
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Daily Reminder", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                repeat(3) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = "Daily Reminder",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        )
-                        Text(
-                            text = "Water your\nSnake Plant today."
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
+                            ) {}
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Water your Snake Plant today.")
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
+                        ) {}
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Weather Section
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F9FB))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = Color(0xFFFF9800),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Weather", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    listOf("Temperature", "Humanity", "Wind Speed").forEach {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
+                            ) {}
+                            Text(text = it, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(0.5f))
+        }
 
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(8.dp))
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            WeatherStat("Temperature", "25℃", Color(0xFF2E7D32), Modifier.weight(1f))
-            WeatherStat("Humidity", "60%", Color(0xFF388E3C), Modifier.weight(1f))
-            WeatherStat("Wind Speed", "15 km/h", Color(0xFF43A047), Modifier.weight(1f))
-        }
-        Spacer(modifier = Modifier.height(32.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Plants stats",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-            Text(
-                text = "See Details",
-                color = Color(0xFF3A915D),
-                fontWeight = FontWeight.Medium
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Image(
-            painter = painterResource(id = R.drawable.graphstat),
-            contentDescription = "Graph",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Recommendation
+        Text(
+            text = "Recommendation",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .wrapContentHeight(),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .border(1.dp, Color.LightGray)
+                ) {}
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("Heading", fontWeight = FontWeight.Bold)
+                    Text("Content")
+                }
+            }
+        }
     }
 }
 
