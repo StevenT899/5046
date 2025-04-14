@@ -187,7 +187,7 @@ fun HomeScreen() {
                         Image(
                             painter = painterResource(id = R.drawable.sunny),
                             contentDescription = "Sunny",
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(56.dp)
                         )
                     }
 
