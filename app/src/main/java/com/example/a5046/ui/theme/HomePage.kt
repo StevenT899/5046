@@ -59,7 +59,7 @@ fun HomeScreen() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // 🔔 Daily Reminder
+            // Daily Reminder
             Card(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -76,29 +76,75 @@ fun HomeScreen() {
                         Text("Daily Reminder", fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    repeat(3) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.temperature),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Water your Snake Plant today.")
-                            }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                painter = painterResource(id = R.drawable.selected),
+                                painter = painterResource(id = R.drawable.temperature),
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(32.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Water your Snake Plant today.")
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.done),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.watering),
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Water your Snake Plant today.")
+                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.undo),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.watering),
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Water your Snake Plant today.")
+                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.undo),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+
                 }
             }
 
@@ -107,40 +153,104 @@ fun HomeScreen() {
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = null,
-                            tint = Color(0xFFFF9800),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Weather", fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 4.dp,
+                        bottom = 16.dp
+                    )
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Weather title + weather image
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = null,
+                                tint = Color(0xFFFF9800),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Weather",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 0.dp)
+                            )
+                        }
+
+
+
+                        Image(
+                            painter = painterResource(id = R.drawable.sunny),
+                            contentDescription = "Sunny",
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        listOf("Temperature", "Humanity", "Wind Speed").forEach {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // temperature
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "24°C", fontWeight = FontWeight.Bold, color = Color(0xFFFF9800), fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Image(
                                     painter = painterResource(id = R.drawable.temperature),
                                     contentDescription = null,
-                                    modifier = Modifier.size(32.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
-                                Text(text = it, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "Temperature", fontSize = 12.sp, color = Color(0xFFFF9800))
+                            }
+                        }
+
+                        // humanity
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "30%", fontWeight = FontWeight.Bold, color = Color(0xFF2196F3), fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.humanity),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "Humanity", fontSize = 12.sp, color = Color(0xFF2196F3))
+                            }
+                        }
+
+                        // UV
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "6", fontWeight = FontWeight.Bold, color = Color(0xFFF44336), fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.uv),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "UV Level", fontSize = 12.sp, color = Color(0xFFF44336))
                             }
                         }
                     }
+
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🌿 Recommendations
+            // Recommendations
             Text(
                 text = "Recommendation",
                 fontWeight = FontWeight.Bold,
