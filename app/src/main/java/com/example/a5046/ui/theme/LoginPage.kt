@@ -100,7 +100,7 @@ fun LoginScreen()  {
                     fontSize = 14.sp
                 )
 
-                Spacer(modifier = Modifier.weight(1f)) // 推右边
+                Spacer(modifier = Modifier.weight(1f))
 
                 Text(
                     text = "Forgot Password?",

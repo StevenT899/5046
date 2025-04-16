@@ -56,9 +56,9 @@ fun FormScreen(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .height(160.dp)
                     .padding(bottom = 14.dp)
-                    .clickable { /* 模拟点击上传 */ },
+                    .clickable {  },
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE1EFE7)) // 浅绿色背景
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE1EFE7))
             ) {
                 Column(
                     modifier = Modifier

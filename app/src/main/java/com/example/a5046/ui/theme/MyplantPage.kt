@@ -122,7 +122,7 @@ fun CustomPlantCard() {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Every month",
+                            text = "Fertilize once a month",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -132,13 +132,13 @@ fun CustomPlantCard() {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_water),
-                            contentDescription = "浇水图标",
+                            contentDescription = "water icon",
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Every 8 days",
+                            text = "Water every 7-8 days",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
