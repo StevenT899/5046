@@ -92,43 +92,43 @@ fun CustomPlantCard() {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "A easy-care plant with pink-edged leaves.",
+                        text = "Tropical evergreen perennial",
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_sunlight),
-                            contentDescription = "光照图标",
+                            painter = painterResource(id = R.drawable.date),
+                            contentDescription = "Date",
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Avoid direct sunlight",
+                            text = "Feb/14/2025",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // 温度信息
+                    //
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_temperature),
-                            contentDescription = "温度图标",
+                            painter = painterResource(id = R.drawable.fertilize),
+                            contentDescription = "fertilize",
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "18°C - 26°C",
+                            text = "Every month",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // 浇水信息
+                    // watering
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_water),
