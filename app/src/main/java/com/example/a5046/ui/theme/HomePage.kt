@@ -47,7 +47,7 @@ fun HomeScreen() {
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text(
-                text = "Hi, Deshui!",
+                text = "Hi, Kris!",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF3A915D)
@@ -89,7 +89,7 @@ fun HomeScreen() {
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your Snake Plant today.")
+                            Text("Fertilize your Snake Plant today.")
                         }
                         Image(
                             painter = painterResource(id = R.drawable.done),
@@ -135,7 +135,7 @@ fun HomeScreen() {
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your Snake Plant today.")
+                            Text("Water your flower today.")
                         }
                         Image(
                             painter = painterResource(id = R.drawable.undo),
@@ -280,7 +280,7 @@ fun HomeScreen() {
                                     .height(120.dp)
                             )
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Heading", fontWeight = FontWeight.Bold)
+                                Text("Gardening Tips", fontWeight = FontWeight.Bold)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text("Gardening is one of the hobbies or " +
                                         "recreation activities suitable for various age. " +
