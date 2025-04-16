@@ -54,7 +54,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .height(120.dp)
                     .padding(bottom = 14.dp)
                     .clickable {  },
                 shape = RoundedCornerShape(12.dp),
@@ -76,28 +76,28 @@ fun FormScreen(modifier: Modifier = Modifier) {
                 }
             }
 
-            FormLabel("Plant Name")
+            FormLabel("Plant Name(*)")
             StyledTextField(plantName) { plantName = it }
 
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Planting Date")
+                    FormLabel("Planting Date(*)")
                     DatePickerField(plantingDate) { plantingDate = it }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Plant Type")
+                    FormLabel("Plant Type(*)")
                     DropdownMenuField(plantTypes, plantType) { plantType = it }
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
-            FormLabel("Watering Frequency")
+            FormLabel("Watering Frequency(*)")
             DropdownMenuField(frequencyOptions, wateringFrequency) { wateringFrequency = it }
 
             Spacer(modifier = Modifier.height(14.dp))
-            FormLabel("Fertilizing Frequency")
+            FormLabel("Fertilizing Frequency(*)")
             DropdownMenuField(frequencyOptions, fertilizingFrequency) { fertilizingFrequency = it }
 
             Spacer(modifier = Modifier.height(14.dp))
