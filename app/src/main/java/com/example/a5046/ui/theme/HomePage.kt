@@ -281,7 +281,12 @@ fun HomeScreen() {
                             )
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text("Heading", fontWeight = FontWeight.Bold)
-                                Text("Content")
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Gardening is one of the hobbies or " +
+                                        "recreation activities suitable for various age. " +
+                                        "There are several challenges for gardeners to " +
+                                        "manage and monitor the plant growth...",  fontSize = 12.sp,
+                                    color = Color.Gray)
                             }
                         }
                     }
