@@ -2,7 +2,6 @@ package com.example.a5046
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,8 +18,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +30,117 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.os.Looper
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.*
+import kotlinx.coroutines.*
+import java.io.IOException
+import java.util.*
 
 @Composable
 fun HomeScreen() {
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val coroutineScope = rememberCoroutineScope()
+
+    var address by remember { mutableStateOf("Locating...") }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (granted) {
+                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+                    .setMaxUpdates(1)
+                    .build()
+
+                val locationCallback = object : LocationCallback() {
+                    override fun onLocationResult(result: LocationResult) {
+                        val location = result.lastLocation
+                        if (location != null) {
+                            coroutineScope.launch {
+                                address = withContext(Dispatchers.IO) {
+                                    getAddressFromLocation(context, location.latitude, location.longitude)
+                                }
+                            }
+                        } else {
+                            address = "Real-time location not available"
+                        }
+                    }
+                }
+
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+            } else {
+                address = "Permission denied"
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasPermission) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else {
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+                .setMaxUpdates(1)
+                .build()
+
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    val location = result.lastLocation
+                    if (location != null) {
+                        coroutineScope.launch {
+                            address = withContext(Dispatchers.IO) {
+                                getAddressFromLocation(context, location.latitude, location.longitude)
+                            }
+                        }
+                    } else {
+                        address = "Real-time location not available"
+                    }
+                }
+            }
+
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        }
+    }
+
+
+
+
+
+
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -52,7 +157,7 @@ fun HomeScreen() {
                 color = Color(0xFF3A915D)
             )
             Text(
-                text = "Clayton, Melbourne",
+                text = address,
                 fontSize = 16.sp,
                 color = Color(0xFF3E3E3E),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -292,6 +397,23 @@ fun HomeScreen() {
                 }
             }
         }
+    }
+}
+
+fun getAddressFromLocation(context: Context, latitude: Double, longitude: Double): String {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        if (!addresses.isNullOrEmpty()) {
+            val address = addresses[0]
+            val city = address.locality ?: ""
+            val state = address.adminArea ?: ""
+            "$city, $state"
+        } else {
+            "No address found"
+        }
+    } catch (e: IOException) {
+        "Geocoder failed: ${e.message}"
     }
 }
 

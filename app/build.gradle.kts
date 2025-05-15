@@ -42,6 +42,20 @@ android {
 dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material)
+    // Accessing location APIs
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Activity lifecycle (used for permission handling)
+    implementation("androidx.activity:activity-compose:1.9.0")
+
+    // Coroutine support for Jetpack Compose and ViewModels
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+    // Core Kotlin coroutines support
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Android-specific coroutine support (for using coroutines on the main thread)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
