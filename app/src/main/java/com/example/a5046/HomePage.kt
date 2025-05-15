@@ -1,4 +1,4 @@
-package com.example.a5046.ui.theme
+package com.example.a5046
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +33,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.example.a5046.R
 
 @Composable
 fun HomeScreen() {

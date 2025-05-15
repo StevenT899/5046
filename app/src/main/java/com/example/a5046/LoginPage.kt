@@ -1,4 +1,4 @@
-package com.example.a5046.ui.theme
+package com.example.a5046
 
 
 import androidx.compose.foundation.Image
@@ -18,8 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.a5046.R
-import com.example.a5046.ui.theme.*
+
 @Composable
 fun LoginScreen()  {
     var email by remember { mutableStateOf("") }

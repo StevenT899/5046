@@ -88,7 +88,7 @@ fun BottomNavigationBar() {
             composable("home") { HomeScreen() }
             composable("plant") { MyPlant() }
             composable("form") { FormScreen() }
-            composable("report") { ReportScreen()}
+            composable("report") { ReportScreen() }
             composable("login") { LoginScreen() }
             composable("register") { RegisterScreen() }
         }

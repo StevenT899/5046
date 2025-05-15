@@ -1,4 +1,4 @@
-package com.example.a5046.ui.theme
+package com.example.a5046
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
