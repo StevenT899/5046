@@ -51,7 +51,7 @@ fun HomeScreen() {
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val coroutineScope = rememberCoroutineScope()
 
-    var address by remember { mutableStateOf("Locating...") }
+    var address by remember { mutableStateOf("Loading...") }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -74,7 +74,7 @@ fun HomeScreen() {
                                 }
                             }
                         } else {
-                            address = "Real-time location not available"
+                            address = "Location not available"
                         }
                     }
                 }
