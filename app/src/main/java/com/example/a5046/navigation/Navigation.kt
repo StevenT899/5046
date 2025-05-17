@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,75 +21,93 @@ import androidx.navigation.compose.rememberNavController
 import com.example.a5046.R
 import com.example.a5046.ui.theme._5046Theme
 import com.example.a5046.screen.*
+import com.example.a5046.viewmodel.AuthViewModel
 
 data class NavRoute(val route: String, val iconResId: Int, val label: String)
 
 @Composable
 fun MainNavigation() {
-    val navRoutes = listOf(
-        NavRoute("home", R.drawable.homeicon, "Home"),
-        NavRoute("plant", R.drawable.myplanticon, "My Plant"),
-        NavRoute("form", R.drawable.formicon, "Form"),
-        NavRoute("report", R.drawable.reporticon, "Report"),
-    )
-
+    val authVM: AuthViewModel = viewModel()
+    val loggedIn = authVM.currentUser != null
     val navController = rememberNavController()
+
 
     Scaffold(
         bottomBar = {
-            BottomNavigation(
-                modifier = Modifier.padding(bottom = 0.dp),
-                backgroundColor = Color.White
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                navRoutes.forEach { navRoute ->
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = navRoute.iconResId),
-                                contentDescription = navRoute.label,
-                                tint = if (currentDestination?.route == navRoute.route)
-                                    Color(0xFF3A915D)
-                                else
-                                    Color.Gray
-                            )
-                        },
-                        selected = currentDestination?.route == navRoute.route,
-                        onClick = {
-                            navController.navigate(navRoute.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    inclusive = false
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        alwaysShowLabel = false
+            if (loggedIn) {
+                BottomNavigation(
+                    modifier = Modifier.padding(bottom = 0.dp),
+                    backgroundColor = Color.White
+                ) {
+                    val backStackEntry by navController.currentBackStackEntryAsState()
+                    val current = backStackEntry?.destination?.route
+                    val navRoutes = listOf(
+                        NavRoute("home", R.drawable.homeicon, "Home"),
+                        NavRoute("plant", R.drawable.myplanticon, "My Plant"),
+                        NavRoute("form", R.drawable.formicon, "Form"),
+                        NavRoute("report", R.drawable.reporticon, "Report"),
                     )
+                    navRoutes.forEach { item ->
+                        BottomNavigationItem(
+                            icon = {
+                                Icon(
+                                    painter = painterResource(item.iconResId),
+                                    contentDescription = item.label,
+                                    tint = if (current == item.route) Color(0xFF3A915D) else Color.Gray
+                                )
+                            },
+                            selected = current == item.route,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id)
+                                    { inclusive = false }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            alwaysShowLabel = false
+                        )
+                    }
                 }
             }
         }
-    ) { paddingValues ->
+    ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = "report",
-            modifier = Modifier.padding(paddingValues)
+            startDestination = if (loggedIn) "home" else "login",
+            modifier = Modifier.padding(padding)
         ) {
-            composable("home") { HomeScreen() }
-            composable("plant") { MyPlant() }
-            composable("form") { FormScreen() }
+            composable("login") {
+                LoginScreen(
+                    authVM = authVM,
+                    onLoginSuccess = {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    },
+                    onSignUpClick = {
+                        navController.navigate("register")
+                    }
+                )
+            }
+            composable("register") {
+                RegisterScreen(
+                    authVM = authVM,
+                    onRegisterSuccess = {
+                        navController.navigate("login") {
+                            popUpTo("register") { inclusive = true }
+                        }
+                    },
+                    onSignInClick = {
+                        navController.navigate("login")
+                    }
+                )
+            }
+
+            composable("home")   { HomeScreen() }
+            composable("plant")  { MyPlant() }
+            composable("form")   { FormScreen() }
             composable("report") { ReportScreen() }
-            composable("login") { LoginScreen() }
-            composable("register") { RegisterScreen() }
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun NavPreview() {
-    _5046Theme {
-        MainNavigation()
-    }
-} 

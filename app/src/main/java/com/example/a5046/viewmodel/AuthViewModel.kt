@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+//reference from GPT
 sealed interface AuthState {
     data object Idle : AuthState
     data object Loading : AuthState
@@ -22,7 +23,6 @@ class AuthViewModel : ViewModel() {
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state: StateFlow<AuthState> = _state
 
-    /* 1. Email/密码登录 */
     fun signInEmail(email: String, pwd: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
         try {
@@ -33,7 +33,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /* 2. 新用户注册 */
     fun signUpEmail(email: String, pwd: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
         try {
@@ -44,7 +43,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /* 3. Google 登录 */
     fun signInWithGoogle(idToken: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
         val cred = GoogleAuthProvider.getCredential(idToken, null)
