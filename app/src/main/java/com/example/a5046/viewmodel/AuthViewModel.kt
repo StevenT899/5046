@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.FirebaseFirestore
 
 // Auth status definition
 sealed interface AuthState {
@@ -91,5 +92,24 @@ class AuthViewModel : ViewModel() {
     val hasCompletedProfile: StateFlow<Boolean> = _hasCompletedProfile
     fun markProfileCompleted() {
         _hasCompletedProfile.value = true
+    }
+
+    fun checkIfProfileCompleted(onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val uid = auth.currentUser?.uid ?: return@launch
+
+        try {
+            val doc = FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            val exists = doc.exists() // true = 用户已填写资料
+            _hasCompletedProfile.value = exists
+            onResult(exists)
+        } catch (e: Exception) {
+            _hasCompletedProfile.value = false
+            onResult(false)
+        }
     }
 }

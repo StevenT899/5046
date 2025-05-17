@@ -7,13 +7,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.a5046.viewmodel.SubmitState
+import com.example.a5046.viewmodel.UserInfoViewModel
 
 
 @Composable
-fun UserInfoForm(modifier: Modifier = Modifier) {
+fun UserInfoForm(modifier: Modifier = Modifier,
+                 onSubmit: () -> Unit) {
+    val viewModel: UserInfoViewModel = viewModel()
+    val submitState by viewModel.submitState.collectAsState()
     var userName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
@@ -28,7 +33,12 @@ fun UserInfoForm(modifier: Modifier = Modifier) {
         "Gardening Specialist",
         "Gardening Master"
     )
-
+    LaunchedEffect(submitState) {
+        if (submitState is SubmitState.Success) {
+            onSubmit()
+            viewModel.resetState()
+        }
+    }
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -73,7 +83,15 @@ fun UserInfoForm(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {},
+                onClick = {
+                    viewModel.submitUserInfo(
+                        name = userName,
+                        phone = phone,
+                        age = age,
+                        gender = gender,
+                        level = gardeningLevel
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
@@ -85,12 +103,4 @@ fun UserInfoForm(modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun UserInfoFormPreview() {
-    UserInfoForm()
 }

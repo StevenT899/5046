@@ -30,6 +30,7 @@ fun MainNavigation() {
     val currentUser by authVM.currentUserState.collectAsState()
     val loggedIn = currentUser != null
     val navController = rememberNavController()
+    val hasCompletedProfile by authVM.hasCompletedProfile.collectAsState()
     Scaffold(
         bottomBar = {
             if (loggedIn) {
@@ -72,15 +73,21 @@ fun MainNavigation() {
     ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = if (loggedIn) "home" else "login",
+            startDestination = when {
+                !loggedIn -> "login"
+                loggedIn && !hasCompletedProfile -> "userinfo"
+                else -> "home"
+            },
             modifier = Modifier.padding(padding)
         ) {
             composable("login") {
                 LoginScreen(
                     authVM = authVM,
                     onLoginSuccess = {
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+                        authVM.checkIfProfileCompleted { exists ->
+                            navController.navigate(if (exists) "home" else "userinfo") {
+                                popUpTo("login") { inclusive = true }
+                            }
                         }
                     },
                     onSignUpClick = {
@@ -92,8 +99,10 @@ fun MainNavigation() {
                 RegisterScreen(
                     authVM = authVM,
                     onRegisterSuccess = {
-                        navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
+                        authVM.checkIfProfileCompleted { exists ->
+                            navController.navigate(if (exists) "home" else "userinfo") {
+                                popUpTo("register") { inclusive = true }
+                            }
                         }
                     },
                     onSignInClick = {
@@ -112,6 +121,17 @@ fun MainNavigation() {
                     onLogout = {
                         navController.navigate("login") {
                             popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable("userinfo") {
+                UserInfoForm(
+                    onSubmit = {
+                        authVM.markProfileCompleted()
+                        navController.navigate("home") {
+                            popUpTo("userinfo") { inclusive = true }
                         }
                     }
                 )

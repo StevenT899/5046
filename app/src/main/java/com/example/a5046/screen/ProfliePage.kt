@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -22,14 +23,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a5046.R
 import com.example.a5046.viewmodel.AuthViewModel
-
+import com.example.a5046.viewmodel.ProfileState
+import com.example.a5046.viewmodel.ProfileViewModel
+import androidx.compose.runtime.getValue
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
 
 @Composable
-fun ProfileCard(authVM: AuthViewModel, onLogout: () -> Unit) {
+fun ProfileCard(
+    authVM: AuthViewModel,
+    onLogout: () -> Unit,
+    profileVM: ProfileViewModel = viewModel()
+) {
     val context = LocalContext.current
+    val state by profileVM.profileState.collectAsState()
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(8.dp)
@@ -41,6 +51,21 @@ fun ProfileCard(authVM: AuthViewModel, onLogout: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF3A915D)
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (state) {
+                is ProfileState.Loading -> Text("Loading...")
+                is ProfileState.Error -> Text("Error: ${(state as ProfileState.Error).message}")
+                is ProfileState.Success -> {
+                    val profile = (state as ProfileState.Success).profile
+                    Text("Name: ${profile.name}")
+                    Text("Phone: ${profile.phone}")
+                    Text("Age: ${profile.age}")
+                    Text("Gender: ${profile.gender}")
+                    Text("Level: ${profile.level}")
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
