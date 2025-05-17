@@ -1,4 +1,4 @@
-package com.example.a5046
+package com.example.a5046.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import android.Manifest
+import com.example.a5046.R
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -44,6 +45,7 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.*
+import android.util.Log
 
 @Composable
 fun HomeScreen() {

@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,4 +70,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+// Activity lifecycle (used for permission handling)
+    implementation("androidx.activity:activity-compose:1.9.0")
+// Coroutine support for Jetpack Compose and ViewModels
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+// Core Kotlin coroutines support
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+// Android-specific coroutine support (for using coroutines on the main thread)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
