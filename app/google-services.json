@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833532586263",
+    "project_id": "plantease-ad899",
+    "storage_bucket": "plantease-ad899.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833532586263:android:d1b31d355e295be920ef52",
+        "android_client_info": {
+          "package_name": "com.example.a5046"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjE2ZJ8oB0VSRboCoqxZrtlsWSLj0VBBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
