@@ -1,4 +1,4 @@
-package com.example.a5046
+package com.example.a5046.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.a5046.R
 
 @Composable
 fun ReportScreen(modifier: Modifier = Modifier) {

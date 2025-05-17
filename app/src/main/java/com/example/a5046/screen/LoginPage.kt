@@ -1,4 +1,4 @@
-package com.example.a5046
+package com.example.a5046.screen
 
 
 import androidx.compose.foundation.Image
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.a5046.R
 
 @Composable
 fun LoginScreen()  {
@@ -108,14 +109,29 @@ fun LoginScreen()  {
                     fontSize = 14.sp
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp).height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A915D))
             ) {
                 Text("Sign in", color = Color.White,fontSize = 18.sp)
+            }
+
+            Button(
+                onClick = { /* TODO: launchGoogleSignIn() */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+            ) {
+                Text(
+                    "Sign in with Google",
+                    fontSize = 18.sp,
+                    color = Color(0xFF3A915D)
+                )
             }
             Row (modifier = Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.Center){
                 Text("Don't have an account? ")
@@ -125,6 +141,9 @@ fun LoginScreen()  {
                     fontWeight = FontWeight.Bold,
                 )
             }
+
+
+
         }
     }
 }

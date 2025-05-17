@@ -1,4 +1,4 @@
-package com.example.a5046
+package com.example.a5046.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
