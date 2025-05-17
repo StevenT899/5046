@@ -14,7 +14,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +25,29 @@ import androidx.compose.ui.unit.sp
 import com.example.a5046.R
 
 
-
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
+
+@Composable
+fun PieChart(
+    data: List<Pair<Float, Color>>,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier) {
+        val total = data.sumOf { it.first.toDouble() }.toFloat().coerceAtLeast(1f)
+        var startAngle = -90f
+        data.forEach { (value, color) ->
+            val sweep = value / total * 360f
+            drawArc(
+                color = color,
+                startAngle = startAngle,
+                sweepAngle = sweep,
+                useCenter = true
+            )
+            startAngle += sweep
+        }
+    }
+}
+
 
 @Composable
 fun GroupedBarChart(
@@ -275,12 +295,21 @@ private fun ViewsByPlantsCard() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.pie_chart),
-                    contentDescription = "Pie Chart",
-                    modifier = Modifier
-                        .size(120.dp),
-                    contentScale = ContentScale.Fit
+//                Image(
+//                    painter = painterResource(id = R.drawable.pie_chart),
+//                    contentDescription = "Pie Chart",
+//                    modifier = Modifier
+//                        .size(120.dp),
+//                    contentScale = ContentScale.Fit
+//                )
+                PieChart(
+                    data = listOf(
+                        39f to Color(0xFF006A43),
+                        28f to Color(0xFF00A86B),
+                        23f to Color(0xFF4EDEA9),
+                        5f  to Color(0xFFAEF7DC)
+                    ),
+                    modifier = Modifier.size(120.dp)
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
