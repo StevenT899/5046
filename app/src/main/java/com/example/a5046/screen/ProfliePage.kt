@@ -14,18 +14,51 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.R
-
+import com.example.a5046.viewmodel.AuthViewModel
 
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
+
+@Composable
+fun ProfileCard(authVM: AuthViewModel, onLogout: () -> Unit) {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "User Profile",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3A915D)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    authVM.signOut(context)
+                    onLogout()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun PieChart(
@@ -156,7 +189,7 @@ fun GroupedBarChart(
 
 
 @Composable
-fun ReportScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -175,6 +208,10 @@ fun ReportScreen(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            ProfileCard(authVM = authVM, onLogout = onLogout)
+
+            Spacer(modifier = Modifier.height(30.dp))
+
             FrequencyCard()
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -183,6 +220,7 @@ fun ReportScreen(modifier: Modifier = Modifier) {
         }
     }
 }
+
 
 @Composable
 private fun FrequencyCard() {
@@ -380,10 +418,4 @@ private fun LegendItem(iconId: Int, label: String) {
             color = Color(0xFF4C4C4C)
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ReportScreenPreview() {
-    ReportScreen()
 }

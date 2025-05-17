@@ -6,11 +6,11 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -19,7 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.a5046.R
-import com.example.a5046.ui.theme._5046Theme
 import com.example.a5046.screen.*
 import com.example.a5046.viewmodel.AuthViewModel
 
@@ -28,10 +27,9 @@ data class NavRoute(val route: String, val iconResId: Int, val label: String)
 @Composable
 fun MainNavigation() {
     val authVM: AuthViewModel = viewModel()
-    val loggedIn = authVM.currentUser != null
+    val currentUser by authVM.currentUserState.collectAsState()
+    val loggedIn = currentUser != null
     val navController = rememberNavController()
-
-
     Scaffold(
         bottomBar = {
             if (loggedIn) {
@@ -45,7 +43,7 @@ fun MainNavigation() {
                         NavRoute("home", R.drawable.homeicon, "Home"),
                         NavRoute("plant", R.drawable.myplanticon, "My Plant"),
                         NavRoute("form", R.drawable.formicon, "Form"),
-                        NavRoute("report", R.drawable.reporticon, "Report"),
+                        NavRoute("profile", R.drawable.profile,"Profile"),
                     )
                     navRoutes.forEach { item ->
                         BottomNavigationItem(
@@ -104,10 +102,22 @@ fun MainNavigation() {
                 )
             }
 
+
             composable("home")   { HomeScreen() }
             composable("plant")  { MyPlant() }
             composable("form")   { FormScreen() }
-            composable("report") { ReportScreen() }
+            composable("profile") {
+                ProfileScreen(
+                    authVM = authVM,
+                    onLogout = {
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+
         }
     }
 }
