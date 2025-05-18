@@ -186,7 +186,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             Button(
                 onClick = {
                     if (validateInputs()) {
-                        authVM.signUpEmail(email.trim(), password)
+                    authVM.signUpEmail(email.trim(), password)
                     }
                 },
                 modifier = Modifier
