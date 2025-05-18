@@ -1,14 +1,22 @@
 package com.example.a5046.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.a5046.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.FirebaseFirestore
 
+// Auth status definition
 sealed interface AuthState {
     data object Idle : AuthState
     data object Loading : AuthState
@@ -19,43 +27,102 @@ sealed interface AuthState {
 class AuthViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state: StateFlow<AuthState> = _state
 
-    /* 1. Email/密码登录 */
-    fun signInEmail(email: String, pwd: String) = viewModelScope.launch {
-        _state.value = AuthState.Loading
-        try {
-            auth.signInWithEmailAndPassword(email, pwd).await()
-            _state.value = AuthState.Success
-        } catch (e: Exception) {
-            _state.value = AuthState.Error(e.message ?: "Login failed")
+    private val _currentUserState = MutableStateFlow(auth.currentUser)
+    val currentUserState: StateFlow<FirebaseUser?> = _currentUserState
+
+    private val _hasCompletedProfile = MutableStateFlow(false)
+    val hasCompletedProfile: StateFlow<Boolean> = _hasCompletedProfile
+
+    init {
+        // Check profile completion status when ViewModel is created
+        auth.currentUser?.let { user ->
+            checkIfProfileCompleted { }
         }
     }
 
-    /* 2. 新用户注册 */
-    fun signUpEmail(email: String, pwd: String) = viewModelScope.launch {
+    //Email + Password Registration with Duplicate Check,reference from AI and
+    fun signUpEmail(email: String, password: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
         try {
-            auth.createUserWithEmailAndPassword(email, pwd).await()
+            auth.createUserWithEmailAndPassword(email, password).await()
+            _currentUserState.value = auth.currentUser
+            _hasCompletedProfile.value = false // Reset profile completion status for new user
+            _state.value = AuthState.Success
+        } catch (e: FirebaseAuthUserCollisionException) {
+            _state.value = AuthState.Error("This email is already registered.")
+        } catch (e: Exception) {
+            _state.value = AuthState.Error(e.message ?: "Registration failed. Please try again.")
+        }
+    }
+    //Email + Password login with Duplicate Check
+    fun signInEmail(email: String, password: String) = viewModelScope.launch {
+        _state.value = AuthState.Loading
+        try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            _currentUserState.value = auth.currentUser
+            checkIfProfileCompleted { }  // Check profile status after successful login
             _state.value = AuthState.Success
         } catch (e: Exception) {
-            _state.value = AuthState.Error(e.message ?: "Register failed")
+            _state.value = AuthState.Error(e.message ?: "Login failed. Please try again.")
         }
     }
 
-    /* 3. Google 登录 */
+    //Google Sign-In
     fun signInWithGoogle(idToken: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
-        val cred = GoogleAuthProvider.getCredential(idToken, null)
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
         try {
-            auth.signInWithCredential(cred).await()
+            auth.signInWithCredential(credential).await()
+            _currentUserState.value = auth.currentUser
+            checkIfProfileCompleted { }  // Check profile status after successful Google sign-in
             _state.value = AuthState.Success
         } catch (e: Exception) {
-            _state.value = AuthState.Error(e.message ?: "Google login failed")
+            _state.value = AuthState.Error(e.message ?: "Google login failed.")
         }
     }
 
-    fun signOut() = auth.signOut()
-    val currentUser get() = auth.currentUser
+    // Sign out
+    fun signOut(context: Context) {
+        val googleSignInClient = GoogleSignIn.getClient(
+            context,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(context.getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+        )
+
+        googleSignInClient.signOut().addOnCompleteListener {
+            auth.signOut()
+            _currentUserState.value = null
+            _hasCompletedProfile.value = false  // Reset profile completion status on sign out
+        }
+    }
+
+    fun markProfileCompleted() {
+        _hasCompletedProfile.value = true
+    }
+
+    fun checkIfProfileCompleted(onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val uid = auth.currentUser?.uid ?: return@launch
+
+        try {
+            val doc = firestore
+                .collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            val isCompleted = doc.exists() && (doc.getBoolean("profileCompleted") == true)
+            _hasCompletedProfile.value = isCompleted
+            onResult(isCompleted)
+        } catch (e: Exception) {
+            _hasCompletedProfile.value = false
+            onResult(false)
+        }
+    }
 }

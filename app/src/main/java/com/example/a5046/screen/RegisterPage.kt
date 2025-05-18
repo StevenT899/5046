@@ -2,7 +2,7 @@ package com.example.a5046.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,18 +11,57 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.a5046.viewmodel.AuthState
+import com.example.a5046.viewmodel.AuthViewModel
+import android.util.Patterns
 
 @Composable
-fun RegisterScreen() {
-    var name by remember { mutableStateOf("") }
+fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInClick: () -> Unit) {
+    val authState by authVM.state.collectAsState()
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) onRegisterSuccess()
+    }
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
+    
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
+    fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun validateInputs(): Boolean {
+        var isValid = true
+        
+        if (email.isBlank()) {
+            emailError = "Email cannot be empty"
+            isValid = false
+        } else if (!isValidEmail(email)) {
+            emailError = "Please enter a valid email address"
+            isValid = false
+        } else {
+            emailError = null
+        }
+
+        if (password != confirmPassword) {
+            passwordError = "Passwords do not match"
+            isValid = false
+        } else if (password.isBlank()) {
+            passwordError = "Password cannot be empty"
+            isValid = false
+        } else {
+            passwordError = null
+        }
+
+        return isValid
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -44,21 +83,6 @@ fun RegisterScreen() {
             )
 
             Text(
-                text = "Name",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Enter your name") },
-                singleLine = true,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .fillMaxWidth()
-            )
-
-            Text(
                 text = "Email",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
@@ -67,9 +91,23 @@ fun RegisterScreen() {
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it
+                    if (emailError != null) {
+                        emailError = null
+                    }
+                },
                 label = { Text("Enter your email") },
                 singleLine = true,
+                isError = emailError != null,
+                supportingText = {
+                    if (emailError != null) {
+                        Text(
+                            text = emailError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth()
@@ -84,9 +122,15 @@ fun RegisterScreen() {
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { 
+                    password = it
+                    if (passwordError != null) {
+                        passwordError = null
+                    }
+                },
                 label = { Text("Enter your password") },
                 singleLine = true,
+                isError = passwordError != null,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(),
@@ -108,9 +152,23 @@ fun RegisterScreen() {
             )
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = { 
+                    confirmPassword = it
+                    if (passwordError != null) {
+                        passwordError = null
+                    }
+                },
                 label = { Text("Re-enter your password") },
                 singleLine = true,
+                isError = passwordError != null,
+                supportingText = {
+                    if (passwordError != null) {
+                        Text(
+                            text = passwordError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(),
@@ -126,7 +184,11 @@ fun RegisterScreen() {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* Handle sign up */ },
+                onClick = {
+                    if (validateInputs()) {
+                        authVM.signUpEmail(email.trim(), password)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
@@ -148,13 +210,9 @@ fun RegisterScreen() {
                     text = "SIGN IN",
                     color = Color(0xFF3A915D),
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onSignInClick() }
                 )
             }
         }
     }
-}
-@Preview(showBackground = true)
-@Composable
-fun RegisterPreview() {
-    RegisterScreen()
 }

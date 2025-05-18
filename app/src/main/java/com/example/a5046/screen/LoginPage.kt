@@ -19,13 +19,103 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.R
+import com.example.a5046.viewmodel.AuthState
+import com.example.a5046.viewmodel.AuthViewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import android.util.Patterns
+
+import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
-fun LoginScreen()  {
+fun LoginScreen(authVM: AuthViewModel, onLoginSuccess: () -> Unit,onSignUpClick: () -> Unit)  {
+    val context = LocalContext.current
+
+    val authState by authVM.state.collectAsState()
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) onLoginSuccess()
+    }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var rememberMeChecked by remember { mutableStateOf(false) }
+    
+    // Add error states
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
+    // Validate email format
+    fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Handle login state
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Success -> onLoginSuccess()
+            is AuthState.Error -> {
+                val errorMsg = (authState as AuthState.Error).msg
+                if (errorMsg.contains("password", ignoreCase = true)) {
+                    passwordError = "Incorrect password, please try again"
+                } else {
+                    passwordError = errorMsg
+                }
+            }
+            else -> {}
+        }
+    }
+
+    // Validate inputs
+    fun validateInputs(): Boolean {
+        var isValid = true
+        
+        if (email.isBlank()) {
+            emailError = "Email cannot be empty"
+            isValid = false
+        } else if (!isValidEmail(email)) {
+            emailError = "Please enter a valid email address"
+            isValid = false
+        } else {
+            emailError = null
+        }
+
+        if (password.isBlank()) {
+            passwordError = "Password cannot be empty"
+            isValid = false
+        } else {
+            passwordError = null
+        }
+
+        return isValid
+    }
+
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    }
+    val googleClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { res ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(res.data)
+        runCatching { task.getResult(ApiException::class.java) }
+            .onSuccess { acct ->
+                acct.idToken?.let { token ->
+                    authVM.signInWithGoogle(token)
+                }
+            }
+            .onFailure { e ->
+                Log.e("GoogleSign", "Login failed", e)
+            }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F7F5)
@@ -55,9 +145,21 @@ fun LoginScreen()  {
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it
+                    emailError = null 
+                },
                 label = { Text("Enter your email") },
                 singleLine = true,
+                isError = emailError != null,
+                supportingText = {
+                    if (emailError != null) {
+                        Text(
+                            text = emailError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier.align(Alignment.Start).fillMaxWidth()
             )
             Text(
@@ -68,13 +170,25 @@ fun LoginScreen()  {
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { 
+                    password = it
+                    passwordError = null 
+                },
                 label = { Text("Enter your password") },
                 singleLine = true,
+                isError = passwordError != null,
+                supportingText = {
+                    if (passwordError != null) {
+                        Text(
+                            text = passwordError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(), //reference from chatGPT
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val text = if (passwordVisible) "HIDE" else "SHOW"
                     TextButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -111,7 +225,11 @@ fun LoginScreen()  {
             }
             Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    if (validateInputs()) {
+                        authVM.signInEmail(email.trim(), password)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp).height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A915D))
@@ -120,7 +238,7 @@ fun LoginScreen()  {
             }
 
             Button(
-                onClick = { /* TODO: launchGoogleSignIn() */ },
+                onClick = { launcher.launch(googleClient.signInIntent) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -139,17 +257,9 @@ fun LoginScreen()  {
                     text = "SIGN UP",
                     color = Color(0xFF3A915D),
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onSignUpClick() }
                 )
             }
-
-
-
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    LoginScreen()
 }

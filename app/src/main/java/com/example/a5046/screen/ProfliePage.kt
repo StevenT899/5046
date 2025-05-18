@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -14,18 +15,75 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a5046.R
-
-
+import com.example.a5046.viewmodel.AuthViewModel
+import com.example.a5046.viewmodel.ProfileState
+import com.example.a5046.viewmodel.ProfileViewModel
+import androidx.compose.runtime.getValue
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
+
+@Composable
+fun ProfileCard(
+    authVM: AuthViewModel,
+    onLogout: () -> Unit,
+    profileVM: ProfileViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    val state by profileVM.profileState.collectAsState()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "User Profile",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3A915D)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (state) {
+                is ProfileState.Loading -> Text("Loading...")
+                is ProfileState.Error -> Text("Error: ${(state as ProfileState.Error).message}")
+                is ProfileState.Success -> {
+                    val profile = (state as ProfileState.Success).profile
+                    Text("Name: ${profile.name}")
+                    Text("Phone: ${profile.phone}")
+                    Text("Age: ${profile.age}")
+                    Text("Gender: ${profile.gender}")
+                    Text("Level: ${profile.level}")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    authVM.signOut(context)
+                    onLogout()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun PieChart(
@@ -156,7 +214,7 @@ fun GroupedBarChart(
 
 
 @Composable
-fun ReportScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -167,13 +225,17 @@ fun ReportScreen(modifier: Modifier = Modifier) {
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text(
-                text = "Report",
+                text = "Profile",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            ProfileCard(authVM = authVM, onLogout = onLogout)
+
+            Spacer(modifier = Modifier.height(30.dp))
 
             FrequencyCard()
 
@@ -183,6 +245,7 @@ fun ReportScreen(modifier: Modifier = Modifier) {
         }
     }
 }
+
 
 @Composable
 private fun FrequencyCard() {
@@ -380,10 +443,4 @@ private fun LegendItem(iconId: Int, label: String) {
             color = Color(0xFF4C4C4C)
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ReportScreenPreview() {
-    ReportScreen()
 }
