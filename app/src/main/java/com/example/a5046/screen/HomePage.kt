@@ -34,7 +34,6 @@ import android.Manifest
 import com.example.a5046.R
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,23 +42,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
-import java.io.IOException
-import java.util.*
-import android.util.Log
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a5046.viewmodel.HomeState
 import com.example.a5046.viewmodel.HomeViewModel
+import com.example.a5046.viewmodel.WeatherState
+import com.example.a5046.viewmodel.WeatherViewModel
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = viewModel(),
+    weatherViewModel: WeatherViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val coroutineScope = rememberCoroutineScope()
     val homeState by homeViewModel.homeState.collectAsState()
-
-    var address by remember { mutableStateOf("Loading...") }
+    val address by homeViewModel.address.collectAsState()
+    val weatherState by weatherViewModel.weatherState.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -76,13 +75,8 @@ fun HomeScreen(
                     override fun onLocationResult(result: LocationResult) {
                         val location = result.lastLocation
                         if (location != null) {
-                            coroutineScope.launch {
-                                address = withContext(Dispatchers.IO) {
-                                    getAddressFromLocation(context, location.latitude, location.longitude)
-                                }
-                            }
-                        } else {
-                            address = "Location not available"
+                            homeViewModel.updateAddress(context, location.latitude, location.longitude)
+                            weatherViewModel.updateWeather(location.latitude, location.longitude)
                         }
                     }
                 }
@@ -92,8 +86,6 @@ fun HomeScreen(
                     locationCallback,
                     Looper.getMainLooper()
                 )
-            } else {
-                address = "Permission denied"
             }
         }
     )
@@ -124,13 +116,8 @@ fun HomeScreen(
                 override fun onLocationResult(result: LocationResult) {
                     val location = result.lastLocation
                     if (location != null) {
-                        coroutineScope.launch {
-                            address = withContext(Dispatchers.IO) {
-                                getAddressFromLocation(context, location.latitude, location.longitude)
-                            }
-                        }
-                    } else {
-                        address = "Real-time location not available"
+                        homeViewModel.updateAddress(context, location.latitude, location.longitude)
+                        weatherViewModel.updateWeather(location.latitude, location.longitude)
                     }
                 }
             }
@@ -170,12 +157,12 @@ fun HomeScreen(
                     )
                 }
                 is HomeState.Error -> {
-            Text(
+                    Text(
                         text = "Hi, User!",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3A915D)
-            )
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A915D)
+                    )
                 }
             }
             
@@ -189,7 +176,8 @@ fun HomeScreen(
             // Daily Reminder
             Card(
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth(),colors = CardDefaults.cardColors(containerColor = Color.White)
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -226,7 +214,6 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -249,7 +236,6 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -270,15 +256,14 @@ fun HomeScreen(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-
-
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Card(
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth(),colors = CardDefaults.cardColors(containerColor = Color.White)
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(
                     modifier = Modifier.padding(
@@ -293,7 +278,6 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Weather title + weather image
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
@@ -309,15 +293,12 @@ fun HomeScreen(
                             )
                         }
 
-
-
                         Image(
                             painter = painterResource(id = R.drawable.sunny),
                             contentDescription = "Sunny",
                             modifier = Modifier.size(56.dp)
                         )
                     }
-
 
                     Spacer(modifier = Modifier.height(4.dp))
 
@@ -326,58 +307,78 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // temperature
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "24°C", fontWeight = FontWeight.Bold, color = Color(0xFFFF9800), fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.temperature),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Temperature", fontSize = 12.sp, color = Color(0xFFFF9800))
+                        when (val state = weatherState) {
+                            is WeatherState.Loading -> {
+                                Text("Loading weather data...")
                             }
-                        }
+                            is WeatherState.Success -> {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "${state.weatherData.temperature.toInt()}°C",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFF9800),
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.temperature),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "Temperature", fontSize = 12.sp, color = Color(0xFFFF9800))
+                                    }
+                                }
 
-                        // humanity
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "30%", fontWeight = FontWeight.Bold, color = Color(0xFF2196F3), fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.humanity),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Humanity", fontSize = 12.sp, color = Color(0xFF2196F3))
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "${state.weatherData.humidity}%",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF2196F3),
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.humanity),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "Humidity", fontSize = 12.sp, color = Color(0xFF2196F3))
+                                    }
+                                }
+
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = state.weatherData.uvIndex.toInt().toString(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFF44336),
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.uv),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "UV Level", fontSize = 12.sp, color = Color(0xFFF44336))
+                                    }
+                                }
                             }
-                        }
-
-                        // UV
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "6", fontWeight = FontWeight.Bold, color = Color(0xFFF44336), fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.uv),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "UV Level", fontSize = 12.sp, color = Color(0xFFF44336))
+                            is WeatherState.Error -> {
+                                Text("Failed to load weather data")
                             }
                         }
                     }
-
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Recommendations
             Text(
                 text = "Recommendation",
                 fontWeight = FontWeight.Bold,
@@ -422,24 +423,6 @@ fun HomeScreen(
         }
     }
 }
-
-fun getAddressFromLocation(context: Context, latitude: Double, longitude: Double): String {
-    return try {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-        if (!addresses.isNullOrEmpty()) {
-            val address = addresses[0]
-            val city = address.locality ?: ""
-            val state = address.adminArea ?: ""
-            "$city, $state"
-        } else {
-            "No address found"
-        }
-    } catch (e: IOException) {
-        "Geocoder failed: ${e.message}"
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
