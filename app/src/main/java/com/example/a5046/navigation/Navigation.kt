@@ -43,7 +43,7 @@ fun MainNavigation() {
                     val navRoutes = listOf(
                         NavRoute("home", R.drawable.homeicon, "Home"),
                         NavRoute("plant", R.drawable.myplanticon, "My Plant"),
-                        NavRoute("form", R.drawable.formicon, "Form"),
+                        NavRoute("form", R.drawable.addicon, "Form"),
                         NavRoute("profile", R.drawable.profile,"Profile"),
                     )
                     navRoutes.forEach { item ->

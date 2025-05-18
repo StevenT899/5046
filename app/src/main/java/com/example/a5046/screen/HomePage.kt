@@ -46,12 +46,18 @@ import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.*
 import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.a5046.viewmodel.HomeState
+import com.example.a5046.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    homeViewModel: HomeViewModel = viewModel()
+) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val coroutineScope = rememberCoroutineScope()
+    val homeState by homeViewModel.homeState.collectAsState()
 
     var address by remember { mutableStateOf("Loading...") }
 
@@ -137,8 +143,6 @@ fun HomeScreen() {
         }
     }
 
-
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -148,12 +152,33 @@ fun HomeScreen() {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            Text(
-                text = "Hi, Kris!",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3A915D)
-            )
+            when (val state = homeState) {
+                is HomeState.Loading -> {
+                    Text(
+                        text = "Loading...",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A915D)
+                    )
+                }
+                is HomeState.Success -> {
+                    Text(
+                        text = "Hi, ${state.userData.name}!",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A915D)
+                    )
+                }
+                is HomeState.Error -> {
+                    Text(
+                        text = "Hi, User!",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A915D)
+                    )
+                }
+            }
+            
             Text(
                 text = address,
                 fontSize = 16.sp,
