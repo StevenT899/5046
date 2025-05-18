@@ -225,7 +225,7 @@ fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifie
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text(
-                text = "Report",
+                text = "Profile",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black

@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.viewmodel.AuthState
 import com.example.a5046.viewmodel.AuthViewModel
+import android.util.Patterns
 
 @Composable
 fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInClick: () -> Unit) {
@@ -28,6 +29,39 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
+    
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
+    fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun validateInputs(): Boolean {
+        var isValid = true
+        
+        if (email.isBlank()) {
+            emailError = "Email cannot be empty"
+            isValid = false
+        } else if (!isValidEmail(email)) {
+            emailError = "Please enter a valid email address"
+            isValid = false
+        } else {
+            emailError = null
+        }
+
+        if (password != confirmPassword) {
+            passwordError = "Passwords do not match"
+            isValid = false
+        } else if (password.isBlank()) {
+            passwordError = "Password cannot be empty"
+            isValid = false
+        } else {
+            passwordError = null
+        }
+
+        return isValid
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -48,8 +82,6 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-
-
             Text(
                 text = "Email",
                 style = MaterialTheme.typography.titleMedium,
@@ -59,9 +91,23 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it
+                    if (emailError != null) {
+                        emailError = null
+                    }
+                },
                 label = { Text("Enter your email") },
                 singleLine = true,
+                isError = emailError != null,
+                supportingText = {
+                    if (emailError != null) {
+                        Text(
+                            text = emailError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth()
@@ -76,9 +122,15 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { 
+                    password = it
+                    if (passwordError != null) {
+                        passwordError = null
+                    }
+                },
                 label = { Text("Enter your password") },
                 singleLine = true,
+                isError = passwordError != null,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(),
@@ -100,9 +152,23 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = { 
+                    confirmPassword = it
+                    if (passwordError != null) {
+                        passwordError = null
+                    }
+                },
                 label = { Text("Re-enter your password") },
                 singleLine = true,
+                isError = passwordError != null,
+                supportingText = {
+                    if (passwordError != null) {
+                        Text(
+                            text = passwordError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(),
@@ -118,9 +184,11 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {if (password == confirmPassword && password.isNotBlank()) {
-                    authVM.signUpEmail(email.trim(), password)
-                }},
+                onClick = {
+                    if (validateInputs()) {
+                        authVM.signUpEmail(email.trim(), password)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
@@ -148,4 +216,3 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
         }
     }
 }
-
