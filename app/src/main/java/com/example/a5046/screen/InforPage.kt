@@ -49,7 +49,7 @@ fun UserInfoForm(modifier: Modifier = Modifier,
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text(
-                text = "User Information",
+                text = "Complete your info",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black

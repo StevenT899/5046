@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,8 @@ import com.example.a5046.viewmodel.AuthViewModel
 import com.example.a5046.viewmodel.ProfileState
 import com.example.a5046.viewmodel.ProfileViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.SolidColor
+
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
 
 @Composable
@@ -40,44 +43,116 @@ fun ProfileCard(
     val context = LocalContext.current
     val state by profileVM.profileState.collectAsState()
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(8.dp)
+        shadowElevation = 4.dp,
+        shape = MaterialTheme.shapes.medium
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "User Profile",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3A915D)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
             when (state) {
-                is ProfileState.Loading -> Text("Loading...")
-                is ProfileState.Error -> Text("Error: ${(state as ProfileState.Error).message}")
+                is ProfileState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = Color(0xFF3A915D)
+                    )
+                }
+
+                is ProfileState.Error -> {
+                    Text(
+                        text = "Error: ${(state as ProfileState.Error).message}",
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                }
+
                 is ProfileState.Success -> {
                     val profile = (state as ProfileState.Success).profile
-                    Text("Name: ${profile.name}")
-                    Text("Phone: ${profile.phone}")
-                    Text("Age: ${profile.age}")
-                    Text("Gender: ${profile.gender}")
-                    Text("Level: ${profile.level}")
+
+                    // Name Row + Sign Out Button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.username),
+                            contentDescription = "Username icon",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Name: ${profile.name}",
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        OutlinedButton(
+                            onClick = {
+                                authVM.signOut(context)
+                                onLogout()
+                            },
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(110.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color(0xFFFF3B30)
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = SolidColor(Color(0xFFFF3B30))
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                            Text(
+                                text = "Sign out",
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Total Plants Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.totleplan),
+                            contentDescription = "Total plants icon",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Total Plants: 12",
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Level Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.userlevel),
+                            contentDescription = "User level icon",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "My Level: ${profile.level}",
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+                    }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    authVM.signOut(context)
-                    onLogout()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }

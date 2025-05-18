@@ -170,12 +170,12 @@ fun HomeScreen(
                     )
                 }
                 is HomeState.Error -> {
-                    Text(
+            Text(
                         text = "Hi, User!",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3A915D)
-                    )
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3A915D)
+            )
                 }
             }
             

@@ -33,7 +33,7 @@ fun MainNavigation() {
     val hasCompletedProfile by authVM.hasCompletedProfile.collectAsState()
     Scaffold(
         bottomBar = {
-            if (loggedIn) {
+            if (loggedIn && hasCompletedProfile) {
                 BottomNavigation(
                     modifier = Modifier.padding(bottom = 0.dp),
                     backgroundColor = Color.White
