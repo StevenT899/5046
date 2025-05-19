@@ -31,6 +31,7 @@ import com.example.a5046.viewmodel.ProfileState
 import com.example.a5046.viewmodel.ProfileViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.SolidColor
+import com.example.a5046.viewmodel.PlantViewModel
 
 data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
 
@@ -191,6 +192,22 @@ fun GroupedBarChart(
     gridColor: Color = Color(0xFFBDBDBD),
     axisColor: Color = Color(0xFF4C4C4C),
 ) {
+    if (data.size < 2) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = when {
+                    data.isEmpty() -> "No data"
+                    else -> "Only ${data[0].week} data"
+                },
+                fontSize = 14.sp,
+                color = Color(0xFF9EA0A5)
+            )
+        }
+        return
+    }
     //calculate dp→px
     val density = LocalDensity.current
     val paddingPx       = with(density) { 16.dp.toPx() }
@@ -244,8 +261,7 @@ fun GroupedBarChart(
             end         = Offset(right, bottom),
             strokeWidth = 2.dp.toPx()
         )
-
-        val groupCount = data.size
+        val groupCount = data.size.coerceAtLeast(1)
         val groupWidth = (right - left) / groupCount
         // single post width
         val barWidth   = groupWidth * 0.3f
@@ -323,13 +339,17 @@ fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifie
 
 
 @Composable
-private fun FrequencyCard() {
-    val stats = listOf(
-        WeekFrequency("Week 1", water = 2, fertilize = 1),
-        WeekFrequency("Week 2", water = 3, fertilize = 2),
-        WeekFrequency("Week 3", water = 4, fertilize = 3),
-        WeekFrequency("Week 4", water = 2, fertilize = 1),
-    )
+private fun FrequencyCard(plantVM: PlantViewModel = viewModel()) {
+    val statsFromVm by plantVM.frequencyByWeek.collectAsState(initial = emptyList())
+    val statsForChart = statsFromVm.map {
+        WeekFrequency(week = it.label, water = it.waterCount, fertilize = it.fertilizeCount)
+    }
+//    val stats = listOf(
+//        WeekFrequency("Week 1", water = 2, fertilize = 1),
+//        WeekFrequency("Week 2", water = 3, fertilize = 2),
+//        WeekFrequency("Week 3", water = 4, fertilize = 3),
+//        WeekFrequency("Week 4", water = 2, fertilize = 1),
+
 
     Card(
         modifier = Modifier
@@ -383,12 +403,24 @@ private fun FrequencyCard() {
 //                    .heightIn(min = 200.dp),
 //                contentScale = ContentScale.Fit
 //            )
-            GroupedBarChart(
-                data = stats,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
+            if (statsForChart.isEmpty()) {
+                Text(
+                    text = "No data",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF9EA0A5),
+                    fontSize = 16.sp
+                )
+            } else {
+                GroupedBarChart(
+                    data = statsForChart,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
+            }
         }
     }
 }
