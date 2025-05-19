@@ -30,8 +30,6 @@ fun UserInfoForm(modifier: Modifier = Modifier,
         "Gardening Beginner",
         "Gardening Novice",
         "Gardening Enthusiast",
-        "Gardening Specialist",
-        "Gardening Master"
     )
     LaunchedEffect(submitState) {
         if (submitState is SubmitState.Success) {

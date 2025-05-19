@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import android.Manifest
@@ -48,11 +49,17 @@ import com.example.a5046.viewmodel.HomeState
 import com.example.a5046.viewmodel.HomeViewModel
 import com.example.a5046.viewmodel.WeatherState
 import com.example.a5046.viewmodel.WeatherViewModel
+import com.example.a5046.viewmodel.RecommendationState
+import com.example.a5046.viewmodel.RecommendationViewModel
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+
 
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
-    weatherViewModel: WeatherViewModel = viewModel()
+    weatherViewModel: WeatherViewModel = viewModel(),
+    recommendationViewModel: RecommendationViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -60,6 +67,18 @@ fun HomeScreen(
     val homeState by homeViewModel.homeState.collectAsState()
     val address by homeViewModel.address.collectAsState()
     val weatherState by weatherViewModel.weatherState.collectAsState()
+    val recommendationState by recommendationViewModel.recommendationState.collectAsState()
+
+    LaunchedEffect(homeState) {
+        when (val state = homeState) {
+            is HomeState.Success -> {
+                recommendationViewModel.loadRecommendations(state.userData.level)
+            }
+            else -> {
+                recommendationViewModel.loadRecommendations("Gardening Beginner")
+            }
+        }
+    }
 
     var isFertilizeDone by remember { mutableStateOf(false) }
     var isWaterSnakeDone by remember { mutableStateOf(false) }
@@ -142,6 +161,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             when (val state = homeState) {
@@ -295,12 +315,7 @@ fun HomeScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 4.dp,
-                        bottom = 16.dp
-                    )
+                    modifier = Modifier.padding(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -318,13 +333,12 @@ fun HomeScreen(
                             Text(
                                 text = "Weather",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                modifier = Modifier.padding(top = 0.dp)
+                                fontSize = 24.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -410,38 +424,98 @@ fun HomeScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                listOf(R.drawable.recommendation, R.drawable.recommendation2).forEach {
-                    Card(
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .wrapContentHeight(),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+            when (val state = recommendationState) {
+                is RecommendationState.Loading -> {
+                    Text("Loading recommendations...", fontSize = 18.sp)
+                }
+                is RecommendationState.Success -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column {
-                            Image(
-                                painter = painterResource(id = it),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp)
-                            )
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Gardening Tips", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Gardening is one of the hobbies or " +
-                                        "recreation activities suitable for various age. " +
-                                        "There are several challenges for gardeners to " +
-                                        "manage and monitor the plant growth...",  fontSize = 16.sp,
-                                    color = Color.Gray)
+                        // First recommendation card
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(400.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column {
+                                Image(
+                                    painter = painterResource(id = R.drawable.recommendation),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(120.dp)
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .padding(12.dp)
+                                ) {
+                                    Text(
+                                        state.recommendations.firstOrNull()?.title ?: "Loading...",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        state.recommendations.firstOrNull()?.content ?: "Loading content...",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
+
+                        // Second recommendation card
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(400.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column {
+                                Image(
+                                    painter = painterResource(id = R.drawable.recommendation2),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(120.dp)
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .padding(12.dp)
+                                ) {
+                                    Text(
+                                        state.recommendations.getOrNull(1)?.title ?: "Loading...",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        state.recommendations.getOrNull(1)?.content ?: "Loading content...",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
                         }
                     }
+                }
+                is RecommendationState.Error -> {
+                    Text(
+                        "Failed to load recommendations: ${state.message}",
+                        fontSize = 18.sp,
+                        color = Color.Red
+                    )
                 }
             }
         }
