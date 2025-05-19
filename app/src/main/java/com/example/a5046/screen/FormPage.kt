@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a5046.data.Plant
 import com.example.a5046.ui.theme._5046Theme
 import com.example.a5046.viewmodel.PlantViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -44,11 +45,12 @@ fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
 
 fun uriToBitmap(context: android.content.Context, uri: Uri): Bitmap? {
     return try {
-        if (Build.VERSION.SDK_INT < 28) {
-            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
             ImageDecoder.decodeBitmap(source)
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
     } catch (e: Exception) {
         e.printStackTrace()
@@ -146,6 +148,13 @@ fun FormScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+                    if (uid == null) {
+                        Toast.makeText(context, "User not logged in.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
                     if (plantName.isNotBlank() && plantingDate.isNotBlank() && plantType.isNotBlank()
                         && wateringFrequency.isNotBlank() && fertilizingFrequency.isNotBlank()) {
 
@@ -159,7 +168,8 @@ fun FormScreen(modifier: Modifier = Modifier) {
                             fertilizingFrequency = fertilizingFrequency,
                             lastWateredDate = lastWateredDate,
                             lastFertilizedDate = lastFertilizedDate,
-                            image = imageBytes
+                            image = imageBytes,
+                            userId = uid
                         )
 
                         Log.d("FormScreen", "Inserting plant: \$newPlant")
