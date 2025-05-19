@@ -172,7 +172,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
                             userId = uid
                         )
 
-                        Log.d("FormScreen", "Inserting plant: \$newPlant")
+                        Log.d("FormScreen", "Inserting plant: ${newPlant}")
                         viewModel.insertPlant(newPlant)
 
                         plantName = ""
