@@ -156,7 +156,7 @@ fun HomeScreen(
                 is HomeState.Success -> {
                     Text(
                         text = "Hi, ${state.userData.name}!",
-                        fontSize = 24.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3A915D)
                     )
@@ -164,7 +164,7 @@ fun HomeScreen(
                 is HomeState.Error -> {
                     Text(
                         text = "Hi, User!",
-                        fontSize = 24.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3A915D)
                     )
@@ -173,7 +173,7 @@ fun HomeScreen(
             
             Text(
                 text = address,
-                fontSize = 16.sp,
+                fontSize = 20.sp,
                 color = Color(0xFF3E3E3E),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -190,10 +190,10 @@ fun HomeScreen(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = null,
                             tint = Color(0xFFFF9800),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Daily Reminder", fontWeight = FontWeight.Bold)
+                        Text("Daily Reminder", fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -209,7 +209,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Fertilize your Snake Plant today.")
+                            Text("Fertilize your Snake Plant today.", fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { isFertilizeDone = !isFertilizeDone }
@@ -236,7 +236,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your Snake Plant today.")
+                            Text("Water your Snake Plant today.", fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { isWaterSnakeDone = !isWaterSnakeDone }
@@ -263,7 +263,7 @@ fun HomeScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your flower today.")
+                            Text("Water your flower today.", fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { isWaterFlowerDone = !isWaterFlowerDone }
@@ -277,6 +277,14 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Click the icon to mark the task as completed",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
                 }
             }
 
@@ -304,24 +312,19 @@ fun HomeScreen(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = null,
                                 tint = Color(0xFFFF9800),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Weather",
                                 fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp,
                                 modifier = Modifier.padding(top = 0.dp)
                             )
                         }
-
-                        Image(
-                            painter = painterResource(id = R.drawable.sunny),
-                            contentDescription = "Sunny",
-                            modifier = Modifier.size(56.dp)
-                        )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -330,7 +333,7 @@ fun HomeScreen(
                     ) {
                         when (val state = weatherState) {
                             is WeatherState.Loading -> {
-                                Text("Loading weather data...")
+                                Text("Loading weather data...", fontSize = 18.sp)
                             }
                             is WeatherState.Success -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -338,7 +341,7 @@ fun HomeScreen(
                                         text = "${state.weatherData.temperature.toInt()}°C",
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFFFF9800),
-                                        fontSize = 16.sp
+                                        fontSize = 24.sp
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -348,7 +351,7 @@ fun HomeScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = "Temperature", fontSize = 12.sp, color = Color(0xFFFF9800))
+                                        Text(text = "Temperature", fontSize = 16.sp, color = Color(0xFFFF9800))
                                     }
                                 }
 
@@ -357,7 +360,7 @@ fun HomeScreen(
                                         text = "${state.weatherData.humidity}%",
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF2196F3),
-                                        fontSize = 16.sp
+                                        fontSize = 24.sp
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -367,7 +370,7 @@ fun HomeScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = "Humidity", fontSize = 12.sp, color = Color(0xFF2196F3))
+                                        Text(text = "Humidity", fontSize = 16.sp, color = Color(0xFF2196F3))
                                     }
                                 }
 
@@ -376,7 +379,7 @@ fun HomeScreen(
                                         text = state.weatherData.uvIndex.toInt().toString(),
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFFF44336),
-                                        fontSize = 16.sp
+                                        fontSize = 24.sp
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -386,12 +389,12 @@ fun HomeScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = "UV Level", fontSize = 12.sp, color = Color(0xFFF44336))
+                                        Text(text = "UV Level", fontSize = 16.sp, color = Color(0xFFF44336))
                                     }
                                 }
                             }
                             is WeatherState.Error -> {
-                                Text("Failed to load weather data")
+                                Text("Failed to load weather data", fontSize = 18.sp)
                             }
                         }
                     }
@@ -403,7 +406,7 @@ fun HomeScreen(
             Text(
                 text = "Recommendation",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
@@ -411,7 +414,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                listOf(R.drawable.recommendation, R.drawable.recommendation).forEach {
+                listOf(R.drawable.recommendation, R.drawable.recommendation2).forEach {
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
@@ -429,12 +432,12 @@ fun HomeScreen(
                                     .height(120.dp)
                             )
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text("Gardening Tips", fontWeight = FontWeight.Bold)
+                                Text("Gardening Tips", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text("Gardening is one of the hobbies or " +
                                         "recreation activities suitable for various age. " +
                                         "There are several challenges for gardeners to " +
-                                        "manage and monitor the plant growth...",  fontSize = 12.sp,
+                                        "manage and monitor the plant growth...",  fontSize = 16.sp,
                                     color = Color.Gray)
                             }
                         }

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.a5046"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -87,4 +87,5 @@ dependencies {
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }
