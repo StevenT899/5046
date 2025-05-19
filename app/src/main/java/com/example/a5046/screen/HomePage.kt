@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,10 @@ fun HomeScreen(
     val homeState by homeViewModel.homeState.collectAsState()
     val address by homeViewModel.address.collectAsState()
     val weatherState by weatherViewModel.weatherState.collectAsState()
+
+    var isFertilizeDone by remember { mutableStateOf(false) }
+    var isWaterSnakeDone by remember { mutableStateOf(false) }
+    var isWaterFlowerDone by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -206,13 +211,18 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Fertilize your Snake Plant today.")
                         }
-                        Image(
-                            painter = painterResource(id = R.drawable.done),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = { isFertilizeDone = !isFertilizeDone }
+                        ) {
+                            Image(
+                                painter = painterResource(
+                                    id = if (isFertilizeDone) R.drawable.done else R.drawable.undo
+                                ),
+                                contentDescription = if (isFertilizeDone) "Mark as undone" else "Mark as done",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -228,13 +238,18 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Water your Snake Plant today.")
                         }
-                        Image(
-                            painter = painterResource(id = R.drawable.undo),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = { isWaterSnakeDone = !isWaterSnakeDone }
+                        ) {
+                            Image(
+                                painter = painterResource(
+                                    id = if (isWaterSnakeDone) R.drawable.done else R.drawable.undo
+                                ),
+                                contentDescription = if (isWaterSnakeDone) "Mark as undone" else "Mark as done",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -250,11 +265,17 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Water your flower today.")
                         }
-                        Image(
-                            painter = painterResource(id = R.drawable.undo),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = { isWaterFlowerDone = !isWaterFlowerDone }
+                        ) {
+                            Image(
+                                painter = painterResource(
+                                    id = if (isWaterFlowerDone) R.drawable.done else R.drawable.undo
+                                ),
+                                contentDescription = if (isWaterFlowerDone) "Mark as undone" else "Mark as done",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
             }
