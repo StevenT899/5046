@@ -19,4 +19,9 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
     val allPlants: Flow<List<Plant>> = plantDao.getAllPlants()
 
+    fun deletePlant(plant: Plant) {
+        viewModelScope.launch {
+            plantDao.delete(plant)
+        }
+    }
 }

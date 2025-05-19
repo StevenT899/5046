@@ -81,7 +81,8 @@ fun MyPlant(
             ) {
                 items(plantList) { plant ->
                     CustomPlantCard(
-                        plant = plant
+                        plant = plant,
+                        onDelete = viewModel::deletePlant
                     )
                 }
             }
@@ -90,7 +91,7 @@ fun MyPlant(
 }
 
 @Composable
-fun CustomPlantCard(plant: Plant) {
+fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
     val bitmap = remember(plant.image) {
         plant.image?.let { bytes ->
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
@@ -194,7 +195,7 @@ fun CustomPlantCard(plant: Plant) {
                         .padding(6.dp)
                         .align(Alignment.Top)
                         .clickable {
-                            //click function
+                            onDelete(plant)//click function
                         },
                     tint = Color.Unspecified
                 )
