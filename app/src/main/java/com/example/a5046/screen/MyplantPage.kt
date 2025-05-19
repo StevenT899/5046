@@ -3,7 +3,6 @@ package com.example.a5046.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,13 +32,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a5046.R
 import com.example.a5046.ui.theme._5046Theme
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import com.example.a5046.data.Plant
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.asImageBitmap
+import com.example.a5046.viewmodel.PlantViewModel
+
+
+
 
 @Composable
-fun MyPlant() {
+fun MyPlant(
+    viewModel: PlantViewModel = viewModel()
+) {
+    val plantList by viewModel.allPlants.collectAsState(initial = emptyList())
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
     ) {
+
+
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,8 +79,10 @@ fun MyPlant() {
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item {
-                    CustomPlantCard()
+                items(plantList) { plant ->
+                    CustomPlantCard(
+                        plant = plant
+                    )
                 }
             }
         }
@@ -72,7 +90,12 @@ fun MyPlant() {
 }
 
 @Composable
-fun CustomPlantCard() {
+fun CustomPlantCard(plant: Plant) {
+    val bitmap = remember(plant.image) {
+        plant.image?.let { bytes ->
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        }
+    }
     Card(
         shape = RoundedCornerShape(4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -84,18 +107,25 @@ fun CustomPlantCard() {
             Row(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
-            )
-            {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_card_1),
-                    contentDescription = "plant picture",
-                    modifier = Modifier.size(160.dp),
-                    tint = Color.Unspecified
-                )
+            ) {
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Plant photo",
+                        modifier = Modifier.size(160.dp)
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_card_1),
+                        contentDescription = "Placeholder",
+                        modifier = Modifier.size(160.dp),
+                        tint = Color.Unspecified
+                    )
+                }
                 Spacer(modifier = Modifier.width(15.dp))
                 Column(modifier = Modifier.fillMaxWidth(0.88f).padding(top = 8.dp)) {
                     Text(
-                        text = "Peperomia Ginny",
+                        text = plant.name,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold
@@ -104,7 +134,7 @@ fun CustomPlantCard() {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Tropical evergreen perennial",
+                        text = plant.plantType,
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -118,7 +148,7 @@ fun CustomPlantCard() {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Feb/14/2025",
+                            text = plant.plantingDate,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -134,7 +164,7 @@ fun CustomPlantCard() {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Fertilize once a month",
+                            text = plant.fertilizingFrequency,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -150,7 +180,7 @@ fun CustomPlantCard() {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Water every 7-8 days",
+                            text = plant.wateringFrequency,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -158,7 +188,7 @@ fun CustomPlantCard() {
                 }
                 Icon(
                     painter = painterResource(id = R.drawable.close),
-                    contentDescription = "Close",
+                    contentDescription = "Delete",
                     modifier = Modifier
                         .size(28.dp)
                         .padding(6.dp)
@@ -172,6 +202,7 @@ fun CustomPlantCard() {
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

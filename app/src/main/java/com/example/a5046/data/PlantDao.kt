@@ -1,6 +1,7 @@
 package com.example.a5046.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -14,3 +15,5 @@ interface PlantDao {
     @Query("SELECT * FROM plant_table ORDER BY id DESC")
     fun getAllPlants(): Flow<List<Plant>>
 }
+
+

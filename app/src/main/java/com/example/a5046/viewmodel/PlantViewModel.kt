@@ -6,14 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.a5046.data.Plant
 import com.example.a5046.data.PlantDatabase
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 
 class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
     private val plantDao = PlantDatabase.getDatabase(application).plantDao()
-
     fun insertPlant(plant: Plant) {
         viewModelScope.launch {
             plantDao.insertPlant(plant)
         }
     }
+
+    val allPlants: Flow<List<Plant>> = plantDao.getAllPlants()
+
 }
