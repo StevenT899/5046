@@ -10,14 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,8 +26,6 @@ import com.example.a5046.viewmodel.ProfileViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.SolidColor
 import com.example.a5046.viewmodel.PlantViewModel
-
-data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
 
 @Composable
 fun ProfileCard(
@@ -184,128 +176,6 @@ fun PieChart(
     }
 }
 
-
-@Composable
-fun GroupedBarChart(
-    data: List<WeekFrequency>,
-    modifier: Modifier = Modifier,
-    waterColor: Color = Color(0xFF3A915D),
-    fertilizeColor: Color = Color(0xFF8CE6A1),
-    gridColor: Color = Color(0xFFBDBDBD),
-    axisColor: Color = Color(0xFF4C4C4C),
-) {
-    if (data.size < 2) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = when {
-                    data.isEmpty() -> "No data"
-                    else -> "Only ${data[0].week} data"
-                },
-                fontSize = 14.sp,
-                color = Color(0xFF9EA0A5)
-            )
-        }
-        return
-    }
-    //calculate dp→px
-    val density = LocalDensity.current
-    val paddingPx       = with(density) { 16.dp.toPx() }
-    val bottomLabelPx   = with(density) { 20.dp.toPx() }   // x text position
-    val textOffsetPx    = with(density) { 12.dp.toPx() }   // y text position
-    val textPaint = android.graphics.Paint().apply {
-        textAlign = android.graphics.Paint.Align.CENTER
-        textSize   = 28f
-        color      = android.graphics.Color.DKGRAY
-    }
-
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-
-        val left   = paddingPx
-        val right  = w - paddingPx
-        val top    = paddingPx
-        val bottom = h - paddingPx - bottomLabelPx
-
-        val maxVal    = data.maxOf { maxOf(it.water, it.fertilize) }.coerceAtLeast(1)
-        val lines     = 4
-        val stepValue = maxVal / lines.toFloat()
-
-
-        for (i in 0..lines) {
-            val y = top + (bottom - top) * (1f - i / lines.toFloat())
-            drawLine(
-                color     = gridColor,
-                start     = Offset(left, y),
-                end       = Offset(right, y),
-                strokeWidth = 1.dp.toPx(),
-                pathEffect  = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-            )
-
-            drawContext.canvas.nativeCanvas.drawText(
-                String.format("%.0f", stepValue * i),
-                left - textOffsetPx,
-                y + textOffsetPx / 2,
-                android.graphics.Paint().apply {
-                    textAlign = android.graphics.Paint.Align.RIGHT
-                    textSize   = 28f
-                    color      = android.graphics.Color.DKGRAY
-                }
-            )
-        }
-
-        drawLine(
-            color       = axisColor,
-            start       = Offset(left, bottom),
-            end         = Offset(right, bottom),
-            strokeWidth = 2.dp.toPx()
-        )
-        val groupCount = data.size.coerceAtLeast(1)
-        val groupWidth = (right - left) / groupCount
-        // single post width
-        val barWidth   = groupWidth * 0.3f
-        // Corner radius
-        val radius     = 4.dp.toPx()
-
-        data.forEachIndexed { idx, item ->
-            val centerX = left + groupWidth * idx + groupWidth / 2
-            val barGap = 6.dp.toPx()
-            val waterLeft = centerX - barGap/2
-            val fertLeft  = centerX + barGap/2
-
-            // water bar
-            val waterH = (item.water / maxVal.toFloat()) * (bottom - top)
-            drawRoundRect(
-                color        = waterColor,
-                topLeft      = Offset(waterLeft - barWidth, bottom - waterH),
-                size         = Size(barWidth, waterH),
-                cornerRadius = CornerRadius(radius, radius)
-            )
-
-            // fertilizer bar
-            val fertH = (item.fertilize / maxVal.toFloat()) * (bottom - top)
-            drawRoundRect(
-                color        = fertilizeColor,
-                topLeft      = Offset(fertLeft, bottom - fertH),
-                size         = Size(barWidth, fertH),
-                cornerRadius = CornerRadius(radius, radius)
-            )
-
-            drawContext.canvas.nativeCanvas.drawText(
-                item.week,
-                centerX,
-                bottom + bottomLabelPx * 0.9f,
-                textPaint
-            )
-        }
-    }
-}
-
-
-
 @Composable
 fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
@@ -330,99 +200,8 @@ fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifie
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            FrequencyCard()
-
-            Spacer(modifier = Modifier.height(30.dp))
 
             ViewsByPlantsCard()
-        }
-    }
-}
-
-
-@Composable
-private fun FrequencyCard(plantVM: PlantViewModel = viewModel()) {
-    val statsFromVm by plantVM.frequencyByWeek.collectAsState(initial = emptyList())
-    val statsForChart = statsFromVm.map {
-        WeekFrequency(week = it.label, water = it.waterCount, fertilize = it.fertilizeCount)
-    }
-//    val stats = listOf(
-//        WeekFrequency("Week 1", water = 2, fertilize = 1),
-//        WeekFrequency("Week 2", water = 3, fertilize = 2),
-//        WeekFrequency("Week 3", water = 4, fertilize = 3),
-//        WeekFrequency("Week 4", water = 2, fertilize = 1),
-
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Statistics",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
-                ),
-                color = Color(0xFF9EA0A5)
-            )
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Frequency",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    ),
-                    color = Color(0xFF2C2C2C)
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column {
-                    LegendItem(R.drawable.bar_water, "Water")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LegendItem(R.drawable.bar_fertilize, "Fertilize")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-//            Image(
-//                painter = painterResource(id = R.drawable.bar_chart),
-//                contentDescription = "Bar Chart",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .heightIn(min = 200.dp),
-//                contentScale = ContentScale.Fit
-//            )
-            if (statsForChart.isEmpty()) {
-                Text(
-                    text = "No data",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFF9EA0A5),
-                    fontSize = 16.sp
-                )
-            } else {
-                GroupedBarChart(
-                    data = statsForChart,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-            }
         }
     }
 }
@@ -431,11 +210,9 @@ private fun FrequencyCard(plantVM: PlantViewModel = viewModel()) {
 private fun ViewsByPlantsCard(
     viewModel: PlantViewModel = viewModel()
 ) {
-    // 从 ViewModel 获取动态的 plantCounts 数据
     val counts by viewModel.plantCounts.collectAsState()
     val total = counts.values.sum().toFloat().coerceAtLeast(1f)
 
-    // 设置植物类型的显示顺序
     val order = listOf("Flower", "Vegetable", "Fruit", "Herb")
     val colorMap = mapOf(
         "Flower"    to Color(0xFF006A43),
@@ -450,7 +227,6 @@ private fun ViewsByPlantsCard(
         "Herb"      to R.drawable.pie_4
     )
 
-    // 计算饼图每个扇区的角度和颜色
     val pieData = order.map { type ->
         val cnt = counts[type] ?: 0
         val sweep = cnt / total * 360f
@@ -508,7 +284,7 @@ private fun ViewsByPlantsCard(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // 展示植物类型的数量
+
                 Column(modifier = Modifier.fillMaxWidth()) {
                     order.forEach { type ->
                         val cnt = counts[type] ?: 0
@@ -558,25 +334,4 @@ private fun DataRow(iconId: Int, label: String, value: String) {
     }
 }
 
-@Composable
-private fun LegendItem(iconId: Int, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(bottom = 4.dp)
-    ) {
-        Image(
-            painter = painterResource(id = iconId),
-            contentDescription = label,
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            ),
-            color = Color(0xFF4C4C4C)
-        )
-    }
-}
+
