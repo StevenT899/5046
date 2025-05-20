@@ -38,6 +38,17 @@ fun ProgressBar(
     val progressPercentage = (currentProgress / maxProgress).coerceIn(0f, 1f)
 
     Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "Task Progress:",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier
+                .padding(start = 4.dp, bottom = 4.dp)
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
