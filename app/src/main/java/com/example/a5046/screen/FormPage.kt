@@ -158,6 +158,9 @@ fun FormScreen(modifier: Modifier = Modifier) {
                     if (plantName.isNotBlank() && plantingDate.isNotBlank() && plantType.isNotBlank()
                         && wateringFrequency.isNotBlank() && fertilizingFrequency.isNotBlank()) {
 
+                        // Show loading toast
+                        Toast.makeText(context, "Saving plant data...", Toast.LENGTH_SHORT).show()
+                        
                         val imageBytes = imageUri?.let { uriToBitmap(context, it) }?.let { bitmapToByteArray(it) }
 
                         val newPlant = Plant(
@@ -173,8 +176,11 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         )
 
                         Log.d("FormScreen", "Inserting plant: ${newPlant}")
+                        
+                        // Insert plant to both Room and Firestore
                         viewModel.insertPlant(newPlant)
 
+                        // Clear form fields
                         plantName = ""
                         plantingDate = ""
                         plantType = ""
@@ -183,7 +189,8 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         lastWateredDate = ""
                         lastFertilizedDate = ""
                         imageUri = null
-                        Toast.makeText(context, "Plant saved successfully!", Toast.LENGTH_SHORT).show()
+                        
+                        Toast.makeText(context, "Plant saved to your collection!", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Please fill all required fields (*)", Toast.LENGTH_SHORT).show()
                     }
