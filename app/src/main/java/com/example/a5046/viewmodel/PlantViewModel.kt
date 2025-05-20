@@ -12,6 +12,7 @@ import java.time.temporal.ChronoField
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import java.time.format.DateTimeFormatter
 
 
@@ -68,4 +69,15 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    val plantCounts: StateFlow<Map<String, Int>> =
+        plantDao.getCountsByType()
+            .map { list ->
+                list.associate { it.type to it.count }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Lazily,
+                initialValue = emptyMap()
+            )
 }

@@ -426,7 +426,34 @@ private fun FrequencyCard(plantVM: PlantViewModel = viewModel()) {
 }
 
 @Composable
-private fun ViewsByPlantsCard() {
+private fun ViewsByPlantsCard(
+    viewModel: PlantViewModel = viewModel()
+) {
+    // 从 ViewModel 获取动态的 plantCounts 数据
+    val counts by viewModel.plantCounts.collectAsState()
+    val total = counts.values.sum().toFloat().coerceAtLeast(1f)
+
+    // 设置植物类型的显示顺序
+    val order = listOf("Flower", "Vegetable", "Fruit", "Herb")
+    val colorMap = mapOf(
+        "Flower"    to Color(0xFF006A43),
+        "Vegetable" to Color(0xFF00A86B),
+        "Fruit"     to Color(0xFF4EDEA9),
+        "Herb"      to Color(0xFFAEF7DC)
+    )
+    val iconMap = mapOf(
+        "Flower"    to R.drawable.pie_1,
+        "Vegetable" to R.drawable.pie_2,
+        "Fruit"     to R.drawable.pie_3,
+        "Herb"      to R.drawable.pie_4
+    )
+
+    // 计算饼图每个扇区的角度和颜色
+    val pieData = order.map { type ->
+        val cnt = counts[type] ?: 0
+        val sweep = cnt / total * 360f
+        sweep to (colorMap[type] ?: Color.Gray)
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -473,22 +500,22 @@ private fun ViewsByPlantsCard() {
 //                    contentScale = ContentScale.Fit
 //                )
                 PieChart(
-                    data = listOf(
-                        39f to Color(0xFF006A43),
-                        28f to Color(0xFF00A86B),
-                        23f to Color(0xFF4EDEA9),
-                        5f  to Color(0xFFAEF7DC)
-                    ),
+                    data = pieData,
                     modifier = Modifier.size(120.dp)
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
+                // 展示植物类型的数量
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    DataRow(R.drawable.pie_1, "Okra", "39.11%")
-                    DataRow(R.drawable.pie_2, "Red Spider Lily", "28.02%")
-                    DataRow(R.drawable.pie_3, "Sacred Lotus", "23.13%")
-                    DataRow(R.drawable.pie_4, "Hippeastrum", "5.03%")
+                    order.forEach { type ->
+                        val cnt = counts[type] ?: 0
+                        DataRow(
+                            iconId = iconMap[type] ?: R.drawable.pie_1,
+                            label = type,
+                            value = cnt.toString()
+                        )
+                    }
                 }
             }
         }
