@@ -68,13 +68,7 @@ fun MyPlant(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(18.dp))
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize(),
-//                contentAlignment = Alignment.TopCenter
-//            ) {
-//                CustomPlantCard()
-//            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -149,7 +143,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = plant.plantingDate,
+                            text = "Planting data: ${plant.plantingDate}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -165,7 +159,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = plant.fertilizingFrequency,
+                            text = "Fertilize every ${plant.fertilizingFrequency} days",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -181,7 +175,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = plant.wateringFrequency,
+                            text = "Water every ${plant.wateringFrequency} days",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
