@@ -1,7 +1,8 @@
 package com.example.a5046.viewmodel
 
+import android.app.Application
 import android.content.Context
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.a5046.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -15,6 +16,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Base64
+import android.util.Log
+import com.example.a5046.data.Plant
+import com.example.a5046.data.PlantDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // Auth status definition
 sealed interface AuthState {
@@ -24,7 +31,7 @@ sealed interface AuthState {
     data class Error(val msg: String) : AuthState
 }
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -59,6 +66,7 @@ class AuthViewModel : ViewModel() {
             _state.value = AuthState.Error(e.message ?: "Registration failed. Please try again.")
         }
     }
+    
     //Email + Password login with Duplicate Check
     fun signInEmail(email: String, password: String) = viewModelScope.launch {
         _state.value = AuthState.Loading
@@ -66,6 +74,12 @@ class AuthViewModel : ViewModel() {
             auth.signInWithEmailAndPassword(email, password).await()
             _currentUserState.value = auth.currentUser
             checkIfProfileCompleted { }  // Check profile status after successful login
+            
+            // Sync plants data after successful login
+            auth.currentUser?.uid?.let { userId ->
+                syncPlantsFromFirestore(userId)
+            }
+            
             _state.value = AuthState.Success
         } catch (e: Exception) {
             _state.value = AuthState.Error(e.message ?: "Login failed. Please try again.")
@@ -80,9 +94,70 @@ class AuthViewModel : ViewModel() {
             auth.signInWithCredential(credential).await()
             _currentUserState.value = auth.currentUser
             checkIfProfileCompleted { }  // Check profile status after successful Google sign-in
+            
+            // Sync plants data after successful Google sign-in
+            auth.currentUser?.uid?.let { userId ->
+                syncPlantsFromFirestore(userId)
+            }
+            
             _state.value = AuthState.Success
         } catch (e: Exception) {
             _state.value = AuthState.Error(e.message ?: "Google login failed.")
+        }
+    }
+
+    // Sync plants data from Firestore to local Room database
+    private suspend fun syncPlantsFromFirestore(userId: String) {
+        try {
+            withContext(Dispatchers.IO) {
+                val plantDao = PlantDatabase.getDatabase(getApplication()).plantDao()
+                
+                // 1. Clear existing plants in Room database
+                plantDao.deleteAllUserPlants(userId)
+                
+                Log.d("AuthViewModel", "Cleared local plant database for user: $userId")
+                
+                // 2. Fetch plants from Firestore
+                val querySnapshot = firestore.collection("plants")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .await()
+                
+                Log.d("AuthViewModel", "Found ${querySnapshot.documents.size} plants in Firestore")
+                
+                // 3. Insert plants into Room database
+                for (document in querySnapshot.documents) {
+                    val plant = Plant(
+                        id = 0, // Room will auto-generate ID
+                        name = document.getString("name") ?: "",
+                        plantingDate = document.getString("plantingDate") ?: "",
+                        plantType = document.getString("plantType") ?: "",
+                        wateringFrequency = document.getString("wateringFrequency") ?: "",
+                        fertilizingFrequency = document.getString("fertilizingFrequency") ?: "",
+                        lastWateredDate = document.getString("lastWateredDate") ?: "",
+                        lastFertilizedDate = document.getString("lastFertilizedDate") ?: "",
+                        userId = userId,
+                        image = null // Default to null
+                    )
+                    
+                    // Process image if exists
+                    document.getString("image")?.let { base64Image ->
+                        try {
+                            val imageBytes = Base64.decode(base64Image, Base64.DEFAULT)
+                            plant.image = imageBytes
+                        } catch (e: Exception) {
+                            Log.e("AuthViewModel", "Failed to decode image", e)
+                        }
+                    }
+                    
+                    // Insert plant into Room
+                    plantDao.insertPlant(plant)
+                }
+                
+                Log.d("AuthViewModel", "Successfully synchronized plants to local database")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthViewModel", "Error synchronizing plants: ${e.message}", e)
         }
     }
 

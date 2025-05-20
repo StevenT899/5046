@@ -13,7 +13,6 @@ data class Plant(
     val fertilizingFrequency: String,
     val lastWateredDate: String,
     val lastFertilizedDate: String,
-    val image: ByteArray? = null,
+    var image: ByteArray? = null,
     val userId: String
 )
-
