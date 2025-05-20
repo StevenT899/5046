@@ -14,12 +14,21 @@ interface PlantDao {
 
     @Query("SELECT * FROM plant_table ORDER BY id DESC")
     fun getAllPlants(): Flow<List<Plant>>
+    
+    @Query("SELECT * FROM plant_table WHERE userId = :userId ORDER BY id DESC")
+    fun getUserPlants(userId: String): Flow<List<Plant>>
 
     @Delete
     suspend fun delete(plant: Plant)
 
+    @Query("DELETE FROM plant_table WHERE userId = :userId")
+    suspend fun deleteAllUserPlants(userId: String)
+
     @Query("SELECT plantType AS type, COUNT(*) AS count FROM plant_table GROUP BY type")
     fun getCountsByType(): Flow<List<TypeCount>>
+    
+    @Query("SELECT plantType AS type, COUNT(*) AS count FROM plant_table WHERE userId = :userId GROUP BY type")
+    fun getUserCountsByType(userId: String): Flow<List<TypeCount>>
 
     data class TypeCount(
         val type: String,

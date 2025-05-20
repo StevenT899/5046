@@ -72,7 +72,8 @@ class UserInfoViewModel : ViewModel() {
             "age" to age,
             "gender" to gender,
             "level" to level,
-            "profileCompleted" to true
+            "profileCompleted" to true,
+            "activities" to 0  // Initialize activities counter as a number with value 0
         )
 
         try {
