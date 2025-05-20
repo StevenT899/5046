@@ -34,6 +34,7 @@ import com.example.a5046.R
 import com.example.a5046.ui.theme._5046Theme
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.offset
 import com.example.a5046.data.Plant
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
@@ -127,13 +128,13 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = plant.plantType,
+                        text = "Type: ${plant.plantType}",
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = R.drawable.date),
@@ -188,6 +189,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         .size(28.dp)
                         .padding(6.dp)
                         .align(Alignment.Top)
+                        .offset(x = (-8).dp, y = (6).dp)
                         .clickable {
                             onDelete(plant)//click function
                         },

@@ -153,8 +153,6 @@ fun ProfileCard(
     }
 }
 
-
-
 @Composable
 fun PieChart(
     data: List<Pair<Float, Color>>,
@@ -270,13 +268,6 @@ private fun ViewsByPlantsCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.pie_chart),
-//                    contentDescription = "Pie Chart",
-//                    modifier = Modifier
-//                        .size(120.dp),
-//                    contentScale = ContentScale.Fit
-//                )
                 PieChart(
                     data = pieData,
                     modifier = Modifier.size(120.dp)
