@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.a5046.data.Plant
 import com.example.a5046.data.PlantDatabase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,6 +20,11 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
     private val plantDao = PlantDatabase.getDatabase(application).plantDao()
     private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    // 获取当前用户ID
+    private val currentUserId: String
+        get() = auth.currentUser?.uid ?: ""
 
     fun insertPlant(plant: Plant) {
         viewModelScope.launch {
@@ -66,7 +72,11 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val allPlants: Flow<List<Plant>> = plantDao.getAllPlants()
+    // 只获取当前用户的植物列表
+    val allPlants: Flow<List<Plant>> = 
+        auth.currentUser?.let {
+            plantDao.getUserPlants(it.uid)
+        } ?: plantDao.getAllPlants() // 如果用户未登录，返回所有植物（理论上应该为空）
 
     fun deletePlant(plant: Plant) {
         viewModelScope.launch {
@@ -127,14 +137,16 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-    val plantCounts: StateFlow<Map<String, Int>> =
-        plantDao.getCountsByType()
-            .map { list ->
-                list.associate { it.type to it.count }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Lazily,
-                initialValue = emptyMap()
-            )
+    // 只获取当前用户的植物类型统计
+    val plantCounts: StateFlow<Map<String, Int>> = (
+        auth.currentUser?.let {
+            plantDao.getUserCountsByType(it.uid)
+        } ?: plantDao.getCountsByType()
+    ).map { list ->
+        list.associate { it.type to it.count }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = emptyMap()
+    )
 }
