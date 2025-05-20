@@ -25,7 +25,84 @@ import com.example.a5046.viewmodel.ProfileState
 import com.example.a5046.viewmodel.ProfileViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.unit.Dp
 import com.example.a5046.viewmodel.PlantViewModel
+
+@Composable
+fun ProgressBar(
+    currentProgress: Float,
+    maxProgress: Float,
+    modifier: Modifier = Modifier,
+    rightPadding: Dp = 16.dp
+) {
+    val progressPercentage = (currentProgress / maxProgress).coerceIn(0f, 1f)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = rightPadding)
+                .height(20.dp)
+        ) {
+            val totalWidth = maxWidth
+            val third = totalWidth / 3f
+
+            // background bar
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color(0xFFECECEC), RoundedCornerShape(10.dp))
+            )
+
+            // percentage
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(fraction = progressPercentage)
+                    .background(Color(0xFF00A86B), RoundedCornerShape(10.dp))
+            )
+
+            // divider lines
+            Box(
+                modifier = Modifier
+                    .offset(x = third)
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(Color.Gray)
+            )
+            Box(
+                modifier = Modifier
+                    .offset(x = third * 2f)
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(Color.Gray)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            listOf("1000", "2000", "3000").forEach { label ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = label,
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
+
 
 @Composable
 fun ProfileCard(
@@ -147,6 +224,10 @@ fun ProfileCard(
                             color = Color.Black
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ProgressBar(currentProgress = 1000f, maxProgress = 3000f)
                 }
             }
         }
