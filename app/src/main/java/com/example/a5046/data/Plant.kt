@@ -16,4 +16,3 @@ data class Plant(
     val image: ByteArray? = null,
     val userId: String
 )
-

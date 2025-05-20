@@ -15,15 +15,14 @@ interface PlantDao {
     @Query("SELECT * FROM plant_table ORDER BY id DESC")
     fun getAllPlants(): Flow<List<Plant>>
 
-
     @Delete
     suspend fun delete(plant: Plant)
+
     @Query("SELECT plantType AS type, COUNT(*) AS count FROM plant_table GROUP BY type")
     fun getCountsByType(): Flow<List<TypeCount>>
+
     data class TypeCount(
         val type: String,
         val count: Int
     )
 }
-
-

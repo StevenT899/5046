@@ -1,27 +1,68 @@
 package com.example.a5046.viewmodel
 
 import android.app.Application
+import android.util.Base64
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.a5046.data.Plant
 import com.example.a5046.data.PlantDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
-import java.time.temporal.ChronoField
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import java.time.format.DateTimeFormatter
-
+import java.time.temporal.ChronoField
 
 class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
     private val plantDao = PlantDatabase.getDatabase(application).plantDao()
+    private val firestore = FirebaseFirestore.getInstance()
+
     fun insertPlant(plant: Plant) {
         viewModelScope.launch {
+            // Save to Room database
             plantDao.insertPlant(plant)
+
+            // Save to Firestore
+            saveToFirestore(plant)
+        }
+    }
+
+    private suspend fun saveToFirestore(plant: Plant) {
+        try {
+            // Create Firestore document data
+            val plantMap = hashMapOf(
+                "name" to plant.name,
+                "plantingDate" to plant.plantingDate,
+                "plantType" to plant.plantType,
+                "wateringFrequency" to plant.wateringFrequency,
+                "fertilizingFrequency" to plant.fertilizingFrequency,
+                "lastWateredDate" to plant.lastWateredDate,
+                "lastFertilizedDate" to plant.lastFertilizedDate,
+                "userId" to plant.userId
+            )
+
+            // Convert image to Base64 if available
+            plant.image?.let {
+                val base64Image = Base64.encodeToString(it, Base64.DEFAULT)
+                plantMap["image"] = base64Image
+            }
+
+            Log.d("PlantViewModel", "Starting to save plant to Firestore: ${plant.name}")
+
+            // Store data in Firestore
+            firestore.collection("plants")
+                .add(plantMap)
+                .addOnSuccessListener { documentReference ->
+                    Log.d("PlantViewModel", "Plant successfully saved to Firestore, ID: ${documentReference.id}")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("PlantViewModel", "Failed to save plant to Firestore: ${e.message}", e)
+                }
+        } catch (e: Exception) {
+            Log.e("PlantViewModel", "Exception occurred while saving to Firestore: ${e.message}", e)
         }
     }
 
@@ -30,8 +71,24 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
     fun deletePlant(plant: Plant) {
         viewModelScope.launch {
             plantDao.delete(plant)
+
+            // Delete from Firestore
+            try {
+                val querySnapshot = firestore.collection("plants")
+                    .whereEqualTo("name", plant.name)
+                    .whereEqualTo("userId", plant.userId)
+                    .get()
+                    .await()
+
+                for (document in querySnapshot.documents) {
+                    document.reference.delete().await()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
+
     data class WeekFrequency(
         val label: String,
         val waterCount: Int,
@@ -54,7 +111,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                 .map { (weekStart, list) ->
                     WeekFrequency(
                         label = weekStart.toString(),
-                        waterCount     = list.sumOf { it.first.wateringFrequency.toIntOrNull() ?: 0 },
+                        waterCount = list.sumOf { it.first.wateringFrequency.toIntOrNull() ?: 0 },
                         fertilizeCount = list.sumOf { it.first.fertilizingFrequency.toIntOrNull() ?: 0 }
                     )
                 }
