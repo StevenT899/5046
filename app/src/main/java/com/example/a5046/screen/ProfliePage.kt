@@ -126,6 +126,7 @@ fun ProfileCard(
     val state by profileVM.profileState.collectAsState()
     val counts      by plantVM.plantCounts.collectAsState(initial = emptyMap())
     val totalPlants = counts.values.sum()
+    val currentProgress by profileVM.currentProgress.collectAsState()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 4.dp,
@@ -238,7 +239,7 @@ fun ProfileCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProgressBar(currentProgress = 1000f, maxProgress = 3000f)
+                    ProgressBar(currentProgress = currentProgress, maxProgress = 3000f)
                 }
             }
         }

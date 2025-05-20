@@ -30,13 +30,20 @@ class ProfileViewModel : ViewModel() {
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState: StateFlow<ProfileState> = _profileState
 
+    private val _currentProgress = MutableStateFlow(0f)
+    val currentProgress: StateFlow<Float> = _currentProgress
+
+    companion object {
+        const val MAX_PROGRESS = 3000f
+    }
+
     init {
         loadUserProfile()
     }
 
     fun loadUserProfile() = viewModelScope.launch {
         _profileState.value = ProfileState.Loading
-        
+
         val uid = auth.currentUser?.uid
         if (uid == null) {
             _profileState.value = ProfileState.Error("Not logged in.")
@@ -51,6 +58,9 @@ class ProfileViewModel : ViewModel() {
                 .await()
 
             if (doc.exists()) {
+                val activities = doc.getLong("activities")?.toFloat() ?: 0f
+                _currentProgress.value = activities.coerceIn(0f, MAX_PROGRESS)
+
                 val profile = UserProfile(
                     name = doc.getString("name") ?: "",
                     phone = doc.getString("phone") ?: "",
