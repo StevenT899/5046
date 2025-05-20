@@ -39,11 +39,13 @@ data class WeekFrequency(val week: String, val water: Int, val fertilize: Int)
 fun ProfileCard(
     authVM: AuthViewModel,
     onLogout: () -> Unit,
-    profileVM: ProfileViewModel = viewModel()
+    profileVM: ProfileViewModel = viewModel(),
+    plantVM: PlantViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val state by profileVM.profileState.collectAsState()
-
+    val counts      by plantVM.plantCounts.collectAsState(initial = emptyMap())
+    val totalPlants = counts.values.sum()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 4.dp,
@@ -128,7 +130,7 @@ fun ProfileCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Total Plants: 12",
+                            text = "Total Plants: $totalPlants",
                             fontSize = 16.sp,
                             color = Color.Black
                         )
