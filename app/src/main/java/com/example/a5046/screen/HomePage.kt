@@ -54,6 +54,11 @@ import com.example.a5046.viewmodel.RecommendationViewModel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateMapOf
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -69,22 +74,15 @@ fun HomeScreen(
     val address by homeViewModel.address.collectAsState()
     val weatherState by weatherViewModel.weatherState.collectAsState()
     val recommendationState by recommendationViewModel.recommendationState.collectAsState()
-    val reminders by homeViewModel.reminders.collectAsState()
+    val reminders by homeViewModel.plantReminders.collectAsState(initial = emptyList())
 
-    LaunchedEffect(homeState) {
-        when (val state = homeState) {
-            is HomeState.Success -> {
-                recommendationViewModel.loadRecommendations(state.userData.level)
-            }
-            else -> {
-                recommendationViewModel.loadRecommendations("Gardening Beginner")
-            }
-        }
-    }
-
-    var isFertilizeDone by remember { mutableStateOf(false) }
-    var isWaterSnakeDone by remember { mutableStateOf(false) }
-    var isWaterFlowerDone by remember { mutableStateOf(false) }
+    // 记录每个事件的完成状态
+    val waterDoneMap = remember { mutableStateMapOf<String, Boolean>() }
+    val fertilizeDoneMap = remember { mutableStateMapOf<String, Boolean>() }
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogType by remember { mutableStateOf("") } // "water" or "fertilize"
+    var dialogReminderId by remember { mutableStateOf("") }
+    var dialogPlantId by remember { mutableStateOf("") }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -157,6 +155,17 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(homeState) {
+        when (val state = homeState) {
+            is HomeState.Success -> {
+                recommendationViewModel.loadRecommendations(state.userData.level)
+            }
+            else -> {
+                recommendationViewModel.loadRecommendations("Gardening Beginner")
+            }
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F7F5)
@@ -220,40 +229,77 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    reminders.filter { !it.isDone }.forEach { reminder ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            val taskText = when {
-                                reminder.needWater -> "${reminder.plantName} need watering"
-                                reminder.needFertilize -> "${reminder.plantName} need fertilizing"
-                                else -> null
-                            }
-
-                            taskText?.let {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    val iconRes = if (reminder.needWater) R.drawable.watering else R.drawable.temperature
-                                    Image(
-                                        painter = painterResource(id = iconRes),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp)
+                    if (reminders.isEmpty()) {
+                        Text(
+                            "No reminders for today",
+                            fontSize = 16.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    } else {
+                        reminders.forEach { reminder ->
+                            // 浇水事件
+                            if (reminder.needWater) {
+                                val isDone = waterDoneMap[reminder.id] == true
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "${reminder.plantName}: Need watering",
+                                        fontSize = 18.sp
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(it, fontSize = 18.sp)
+                                    IconButton(
+                                        onClick = {
+                                            if (!isDone) {
+                                                dialogType = "water"
+                                                dialogReminderId = reminder.id
+                                                showDialog = true
+                                            }
+                                        },
+                                        enabled = !isDone
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = if (isDone) R.drawable.done else R.drawable.undo),
+                                            contentDescription = if (isDone) "Done" else "Undo",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
                                 }
-
-                                IconButton(onClick = {
-                                    homeViewModel.markReminderDone(reminder)
-                                }) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.undo),
-                                        contentDescription = "Mark as done",
-                                        modifier = Modifier.size(24.dp)
+                            }
+                            // 施肥事件
+                            if (reminder.needFertilize) {
+                                val isDone = fertilizeDoneMap[reminder.id] == true
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "${reminder.plantName}: Need fertilizing",
+                                        fontSize = 18.sp
                                     )
+                                    IconButton(
+                                        onClick = {
+                                            if (!isDone) {
+                                                dialogType = "fertilize"
+                                                dialogReminderId = reminder.id
+                                                showDialog = true
+                                            }
+                                        },
+                                        enabled = !isDone
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = if (isDone) R.drawable.done else R.drawable.undo),
+                                            contentDescription = if (isDone) "Done" else "Undo",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -261,7 +307,7 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "点击图标标记为完成",
+                        text = "Select any box to mark as finished",
                         fontSize = 14.sp,
                         color = Color.Gray,
                         modifier = Modifier.align(Alignment.Start)
@@ -489,6 +535,34 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Confirm Modal") },
+            text = { Text("Are you sure you want to mark it as completed？") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    if (dialogType == "water") {
+                        waterDoneMap[dialogReminderId] = true
+                        homeViewModel.markWaterDone(dialogReminderId, dialogPlantId)
+                    } else if (dialogType == "fertilize") {
+                        fertilizeDoneMap[dialogReminderId] = true
+                        homeViewModel.markFertilizeDone(dialogReminderId, dialogPlantId)
+                    }
+                }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

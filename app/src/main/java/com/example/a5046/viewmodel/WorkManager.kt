@@ -37,6 +37,7 @@ class PlantReminderWorker(
                 val fertilizeInterval = doc.getString("fertilizingFrequency")?.toIntOrNull()
 
 
+
                 val needWater = if (!lastWateredStr.isNullOrEmpty() && waterInterval != null) {
                     val lastWatered = LocalDate.parse(lastWateredStr, formatter)
                     !lastWatered.plusDays(waterInterval.toLong()).isAfter(today)

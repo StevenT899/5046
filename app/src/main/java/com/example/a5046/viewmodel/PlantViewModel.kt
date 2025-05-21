@@ -80,6 +80,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deletePlant(plant: Plant) {
         viewModelScope.launch {
+            // Delete from Room database
             plantDao.delete(plant)
 
             // Delete from Firestore
@@ -93,6 +94,13 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                 for (document in querySnapshot.documents) {
                     document.reference.delete().await()
                 }
+
+                // 同步删除plantReminders中的对应文档
+                firestore.collection("users")
+                    .document(plant.userId)
+                    .collection("plantReminders")
+                    .document(querySnapshot.documents.firstOrNull()?.id ?: plant.name)
+                    .delete()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
