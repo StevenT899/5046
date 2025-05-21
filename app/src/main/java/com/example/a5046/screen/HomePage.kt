@@ -76,7 +76,7 @@ fun HomeScreen(
     val recommendationState by recommendationViewModel.recommendationState.collectAsState()
     val reminders by homeViewModel.plantReminders.collectAsState(initial = emptyList())
 
-    // 记录每个事件的完成状态
+    // Track completion status for each event
     val waterDoneMap = remember { mutableStateMapOf<String, Boolean>() }
     val fertilizeDoneMap = remember { mutableStateMapOf<String, Boolean>() }
     var showDialog by remember { mutableStateOf(false) }
@@ -229,16 +229,17 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    if (reminders.isEmpty()) {
+                    val hasEvent = reminders.any { it.needWater || it.needFertilize }
+                    if (!hasEvent) {
                         Text(
-                            "No tasks for today!",
+                            "No events for today, enjoy your day!",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     } else {
                         reminders.forEach { reminder ->
-                            // 浇水事件
+                            // Watering event
                             if (reminder.needWater) {
                                 val isDone = waterDoneMap[reminder.id] == true
                                 Row(
@@ -270,7 +271,7 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                            // 施肥事件
+                            // Fertilizing event
                             if (reminder.needFertilize) {
                                 val isDone = fertilizeDoneMap[reminder.id] == true
                                 Row(
@@ -303,23 +304,14 @@ fun HomeScreen(
                                 }
                             }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Select any box to mark as finished",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Select any box to mark as finished",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-
-                    Button(
-                        onClick = { homeViewModel.debugRunReminderCheck() },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text("🔍 Check button")
-                    }
-
                 }
             }
 
@@ -542,7 +534,7 @@ fun HomeScreen(
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text("Confirm Modal") },
-            text = { Text("Are you sure you want to mark it as completed？") },
+            text = { Text("Are you sure you want to mark it as completed?") },
             confirmButton = {
                 TextButton(onClick = {
                     showDialog = false
