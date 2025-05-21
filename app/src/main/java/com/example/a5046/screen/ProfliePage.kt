@@ -38,14 +38,50 @@ fun ProgressBar(
     val progressPercentage = (currentProgress / maxProgress).coerceIn(0f, 1f)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Task Progress:",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
+
+        val tier = when {
+            currentProgress < 200f -> "Bronze Seeker"
+            currentProgress < 400f -> "Silver Vanguard"
+            else                      -> "Golden Aegis"
+        }
+
+        val tierIcon = when {
+            currentProgress < 200f -> R.drawable.bronze_seeker
+            currentProgress < 400f -> R.drawable.silver_vanguard
+            else -> R.drawable.golden_aegis
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(start = 4.dp, bottom = 4.dp)
-        )
+                .fillMaxWidth()
+                .padding(start = 4.dp)
+        ) {
+            Text(
+                text = "Your Growth Level:  ",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+
+            Image(
+                painter = painterResource(id = tierIcon),
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
+
+            Text(
+                text = "$tier",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = when {
+                    currentProgress < 200f -> Color(0xFFEB710D) // Bronze color
+                    currentProgress < 400f -> Color(0xFFA3C3CA) // Silver color
+                    else -> Color(0xFFF8B917) // Gold color
+                }
+            )
+        }
+
 
         Spacer(modifier = Modifier.height(2.dp))
 
@@ -93,7 +129,7 @@ fun ProgressBar(
         Spacer(modifier = Modifier.height(4.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            listOf("1000", "2000", "3000").forEach { label ->
+            listOf("200", "400", "600").forEach { label ->
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -239,7 +275,7 @@ fun ProfileCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProgressBar(currentProgress = currentProgress, maxProgress = 3000f)
+                    ProgressBar(currentProgress = currentProgress, maxProgress = 600f)
                 }
             }
         }

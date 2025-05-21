@@ -34,7 +34,7 @@ class ProfileViewModel : ViewModel() {
     val currentProgress: StateFlow<Float> = _currentProgress
 
     companion object {
-        const val MAX_PROGRESS = 3000f
+        const val MAX_PROGRESS = 600f
     }
 
     init {
