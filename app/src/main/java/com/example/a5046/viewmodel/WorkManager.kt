@@ -1,3 +1,4 @@
+// WorkManager.kt
 package com.example.a5046.viewmodel
 
 import android.content.Context
@@ -15,7 +16,7 @@ class PlantReminderWorker(
 ) : CoroutineWorker(context, params) {
 
     private val firestore = FirebaseFirestore.getInstance()
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
 
     override suspend fun doWork(): Result {
         val userId = inputData.getString("uid") ?: return Result.failure()
@@ -30,23 +31,20 @@ class PlantReminderWorker(
 
             for (doc in snapshot.documents) {
                 val name = doc.getString("name") ?: continue
-                val lastWateredStr = doc.getString("lastWatered")
-                val waterInterval = doc.getLong("waterInterval")?.toInt()
-                val lastFertilizedStr = doc.getString("lastFertilized")
-                val fertilizeInterval = doc.getLong("fertilizeInterval")?.toInt()
+                val lastWateredStr = doc.getString("lastWateredDate")
+                val lastFertilizedStr = doc.getString("lastFertilizedDate")
+                val waterInterval = doc.getString("wateringFrequency")?.toIntOrNull()
+                val fertilizeInterval = doc.getString("fertilizingFrequency")?.toIntOrNull()
 
-                // watering
+
                 val needWater = if (!lastWateredStr.isNullOrEmpty() && waterInterval != null) {
                     val lastWatered = LocalDate.parse(lastWateredStr, formatter)
-                    val nextWaterDate = lastWatered.plusDays(waterInterval.toLong())
-                    !nextWaterDate.isAfter(today)
+                    !lastWatered.plusDays(waterInterval.toLong()).isAfter(today)
                 } else false
 
-                // fertilizing
                 val needFertilize = if (!lastFertilizedStr.isNullOrEmpty() && fertilizeInterval != null) {
                     val lastFertilized = LocalDate.parse(lastFertilizedStr, formatter)
-                    val nextFertilizeDate = lastFertilized.plusDays(fertilizeInterval.toLong())
-                    !nextFertilizeDate.isAfter(today)
+                    !lastFertilized.plusDays(fertilizeInterval.toLong()).isAfter(today)
                 } else false
 
                 if (needWater || needFertilize) {
@@ -67,17 +65,16 @@ class PlantReminderWorker(
                                 "plantName" to name,
                                 "needWater" to needWater,
                                 "needFertilize" to needFertilize,
+                                "isDone" to false,
                                 "timestamp" to System.currentTimeMillis()
                             )
                         )
                     }
                 }
             }
-
             return Result.success()
         } catch (e: Exception) {
-            Log.e("ReminderWorker", "Error: ${e.message}")
-            e.printStackTrace()
+            Log.e("ReminderWorker", "Error: ${e.message}", e)
             return Result.failure()
         }
     }

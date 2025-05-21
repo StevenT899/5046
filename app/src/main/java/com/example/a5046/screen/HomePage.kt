@@ -53,6 +53,7 @@ import com.example.a5046.viewmodel.RecommendationState
 import com.example.a5046.viewmodel.RecommendationViewModel
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Button
 
 
 @Composable
@@ -68,6 +69,7 @@ fun HomeScreen(
     val address by homeViewModel.address.collectAsState()
     val weatherState by weatherViewModel.weatherState.collectAsState()
     val recommendationState by recommendationViewModel.recommendationState.collectAsState()
+    val reminders by homeViewModel.reminders.collectAsState()
 
     LaunchedEffect(homeState) {
         when (val state = homeState) {
@@ -115,6 +117,7 @@ fun HomeScreen(
     )
 
     LaunchedEffect(Unit) {
+        homeViewModel.loadReminders()
         val hasPermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -198,7 +201,6 @@ fun HomeScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Daily Reminder
             Card(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -215,98 +217,66 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Daily Reminder", fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     }
+
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(id = R.drawable.temperature),
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Fertilize your Snake Plant today.", fontSize = 18.sp)
-                        }
-                        IconButton(
-                            onClick = { isFertilizeDone = !isFertilizeDone }
+                    reminders.filter { !it.isDone }.forEach { reminder ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Image(
-                                painter = painterResource(
-                                    id = if (isFertilizeDone) R.drawable.done else R.drawable.undo
-                                ),
-                                contentDescription = if (isFertilizeDone) "Mark as undone" else "Mark as done",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
+                            val taskText = when {
+                                reminder.needWater -> "${reminder.plantName} need watering"
+                                reminder.needFertilize -> "${reminder.plantName} need fertilizing"
+                                else -> null
+                            }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(id = R.drawable.watering),
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your Snake Plant today.", fontSize = 18.sp)
-                        }
-                        IconButton(
-                            onClick = { isWaterSnakeDone = !isWaterSnakeDone }
-                        ) {
-                            Image(
-                                painter = painterResource(
-                                    id = if (isWaterSnakeDone) R.drawable.done else R.drawable.undo
-                                ),
-                                contentDescription = if (isWaterSnakeDone) "Mark as undone" else "Mark as done",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
+                            taskText?.let {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val iconRes = if (reminder.needWater) R.drawable.watering else R.drawable.temperature
+                                    Image(
+                                        painter = painterResource(id = iconRes),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(it, fontSize = 18.sp)
+                                }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(id = R.drawable.watering),
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Water your flower today.", fontSize = 18.sp)
-                        }
-                        IconButton(
-                            onClick = { isWaterFlowerDone = !isWaterFlowerDone }
-                        ) {
-                            Image(
-                                painter = painterResource(
-                                    id = if (isWaterFlowerDone) R.drawable.done else R.drawable.undo
-                                ),
-                                contentDescription = if (isWaterFlowerDone) "Mark as undone" else "Mark as done",
-                                modifier = Modifier.size(24.dp)
-                            )
+                                IconButton(onClick = {
+                                    homeViewModel.markReminderDone(reminder)
+                                }) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.undo),
+                                        contentDescription = "Mark as done",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Click the icon to mark the task as completed",
+                        text = "点击图标标记为完成",
                         fontSize = 14.sp,
                         color = Color.Gray,
                         modifier = Modifier.align(Alignment.Start)
                     )
+
+                    Button(
+                        onClick = { homeViewModel.debugRunReminderCheck() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("🔍 Check button")
+                    }
+
                 }
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
             Card(
