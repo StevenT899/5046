@@ -231,7 +231,7 @@ fun HomeScreen(
 
                     if (reminders.isEmpty()) {
                         Text(
-                            "No reminders for today",
+                            "No tasks for today!",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             modifier = Modifier.padding(vertical = 8.dp)

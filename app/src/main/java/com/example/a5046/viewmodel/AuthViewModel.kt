@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.a5046.R
+import com.example.a5046.PlantApplication
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -80,6 +81,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 syncPlantsFromFirestore(userId)
             }
             
+            // Initialize WorkManager after successful login
+            (getApplication() as PlantApplication).setupWorkManager()
+            
             _state.value = AuthState.Success
         } catch (e: Exception) {
             _state.value = AuthState.Error(e.message ?: "Login failed. Please try again.")
@@ -99,6 +103,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             auth.currentUser?.uid?.let { userId ->
                 syncPlantsFromFirestore(userId)
             }
+            
+            // Initialize WorkManager after successful Google sign-in
+            (getApplication() as PlantApplication).setupWorkManager()
             
             _state.value = AuthState.Success
         } catch (e: Exception) {

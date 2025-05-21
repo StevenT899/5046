@@ -22,7 +22,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // 获取当前用户ID
+    // get current user ID
     private val currentUserId: String
         get() = auth.currentUser?.uid ?: ""
 
@@ -72,11 +72,11 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // 只获取当前用户的植物列表
+
     val allPlants: Flow<List<Plant>> = 
         auth.currentUser?.let {
             plantDao.getUserPlants(it.uid)
-        } ?: plantDao.getAllPlants() // 如果用户未登录，返回所有植物（理论上应该为空）
+        } ?: plantDao.getAllPlants()
 
     fun deletePlant(plant: Plant) {
         viewModelScope.launch {
@@ -145,7 +145,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-    // 只获取当前用户的植物类型统计
+
     val plantCounts: StateFlow<Map<String, Int>> = (
         auth.currentUser?.let {
             plantDao.getUserCountsByType(it.uid)
