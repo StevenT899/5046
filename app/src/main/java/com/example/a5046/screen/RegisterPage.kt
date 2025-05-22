@@ -29,7 +29,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
-    
+
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
@@ -39,7 +39,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
 
     fun validateInputs(): Boolean {
         var isValid = true
-        
+
         if (email.isBlank()) {
             emailError = "Email cannot be empty"
             isValid = false
@@ -50,11 +50,14 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             emailError = null
         }
 
-        if (password != confirmPassword) {
-            passwordError = "Passwords do not match"
-            isValid = false
-        } else if (password.isBlank()) {
+        if (password.isBlank()) {
             passwordError = "Password cannot be empty"
+            isValid = false
+        } else if (password.length < 6) {
+            passwordError = "Password must be at least 6 characters long"
+            isValid = false
+        } else if (password != confirmPassword) {
+            passwordError = "Passwords do not match"
             isValid = false
         } else {
             passwordError = null
@@ -91,7 +94,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { 
+                onValueChange = {
                     email = it
                     if (emailError != null) {
                         emailError = null
@@ -122,7 +125,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { 
+                onValueChange = {
                     password = it
                     if (passwordError != null) {
                         passwordError = null
@@ -152,7 +155,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { 
+                onValueChange = {
                     confirmPassword = it
                     if (passwordError != null) {
                         passwordError = null
@@ -186,7 +189,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             Button(
                 onClick = {
                     if (validateInputs()) {
-                    authVM.signUpEmail(email.trim(), password)
+                        authVM.signUpEmail(email.trim(), password)
                     }
                 },
                 modifier = Modifier
