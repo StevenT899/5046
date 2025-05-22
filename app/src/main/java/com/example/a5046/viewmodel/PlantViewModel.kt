@@ -18,14 +18,15 @@ import java.time.temporal.ChronoField
 
 class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val plantDao = PlantDatabase.getDatabase(application).plantDao()
-    private val firestore = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private val plantDao = PlantDatabase.getDatabase(application).plantDao()// Local DB access
+    private val firestore = FirebaseFirestore.getInstance()// Firebase Firestore
+    private val auth = FirebaseAuth.getInstance()// Firebase Auth
 
     // get current user ID
     private val currentUserId: String
         get() = auth.currentUser?.uid ?: ""
 
+    // Insert a new plant (local DB + Firestore)
     fun insertPlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
             // Save to Room database
@@ -59,11 +60,13 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // All plants as Flow (user-specific if logged in)
     val allPlants: Flow<List<Plant>> =
         auth.currentUser?.let {
             plantDao.getUserPlants(it.uid)
         } ?: plantDao.getAllPlants()
 
+    // Delete a plant (from both Room and Firestore)
     fun deletePlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
             // Delete from Room database
@@ -105,6 +108,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         .map { plantList ->
             val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
 
+            // Parse planting dates
             val plantsWithDate = plantList.mapNotNull { plant ->
                 runCatching {
                     val date = LocalDate.parse(plant.plantingDate, formatter)
@@ -112,6 +116,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                 }.getOrNull()
             }
 
+            // Group by week and calculate total frequencies
             val rawByWeek = plantsWithDate
                 .groupBy { (_, date) -> date.with(ChronoField.DAY_OF_WEEK, 1) }
                 .map { (weekStart, list) ->
@@ -123,6 +128,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 .sortedBy { it.label }
 
+            // Label weeks as "Week 1", "Week 2", etc.
             rawByWeek.mapIndexed { idx, wf ->
                 wf.copy(label = "Week ${idx + 1}")
             }
@@ -133,7 +139,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-
+    // Count of plants grouped by type
     val plantCounts: StateFlow<Map<String, Int>> = (
         auth.currentUser?.let {
             plantDao.getUserCountsByType(it.uid)

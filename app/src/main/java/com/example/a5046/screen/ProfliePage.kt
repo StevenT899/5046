@@ -28,29 +28,32 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.Dp
 import com.example.a5046.viewmodel.PlantViewModel
 
+//Show user progress and level bar
 @Composable
 fun ProgressBar(
-    currentProgress: Float,
-    maxProgress: Float,
+    currentProgress: Float,// user's current progress value
+    maxProgress: Float,// maximum progress value (600f currently)
     modifier: Modifier = Modifier,
     rightPadding: Dp = 16.dp
 ) {
-    val progressPercentage = (currentProgress / maxProgress).coerceIn(0f, 1f)
+    val progressPercentage = (currentProgress / maxProgress).coerceIn(0f, 1f)// limit between 0 and 1
 
     Column(modifier = modifier.fillMaxWidth()) {
-
+        //Define dynamic level title
         val tier = when {
             currentProgress < 200f -> "Bronze Seeker"
             currentProgress < 400f -> "Silver Vanguard"
             else                      -> "Golden Aegis"
         }
 
+        //Define dynamic level icon
         val tierIcon = when {
             currentProgress < 200f -> R.drawable.bronze_seeker
             currentProgress < 400f -> R.drawable.silver_vanguard
             else -> R.drawable.golden_aegis
         }
 
+        //Show level title and icon
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -82,10 +85,10 @@ fun ProgressBar(
             )
         }
 
-
         Spacer(modifier = Modifier.height(2.dp))
 
-        BoxWithConstraints(
+        //Draw the progress bar with 3 segments
+        BoxWithConstraints(                     // Use BoxWithConstraints to get the total width of the progress bar
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = rightPadding)
@@ -117,6 +120,7 @@ fun ProgressBar(
                     .fillMaxHeight()
                     .background(Color.Gray)
             )
+
             Box(
                 modifier = Modifier
                     .offset(x = third * 2f)
@@ -128,6 +132,7 @@ fun ProgressBar(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        //Progress number labels
         Row(modifier = Modifier.fillMaxWidth()) {
             listOf("200", "400", "600").forEach { label ->
                 Box(
@@ -147,10 +152,7 @@ fun ProgressBar(
     }
 }
 
-
-
-
-
+//Profile information card (name, level, plant count, logout)
 @Composable
 fun ProfileCard(
     authVM: AuthViewModel,
@@ -163,6 +165,7 @@ fun ProfileCard(
     val counts      by plantVM.plantCounts.collectAsState(initial = emptyMap())
     val totalPlants = counts.values.sum()
     val currentProgress by profileVM.currentProgress.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 4.dp,
@@ -202,13 +205,18 @@ fun ProfileCard(
                             contentDescription = "Username icon",
                             modifier = Modifier.size(20.dp)
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
                             text = "Name: ${profile.name}",
                             fontSize = 16.sp,
                             color = Color.Black
                         )
+
                         Spacer(modifier = Modifier.weight(1f))
+
+                        //Sign out button
                         OutlinedButton(
                             onClick = {
                                 authVM.signOut(context)
@@ -245,7 +253,9 @@ fun ProfileCard(
                             contentDescription = "Total plants icon",
                             modifier = Modifier.size(20.dp)
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
                             text = "Total Plants: $totalPlants",
                             fontSize = 16.sp,
@@ -265,7 +275,9 @@ fun ProfileCard(
                             contentDescription = "User level icon",
                             modifier = Modifier.size(20.dp)
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
                             text = "My Level: ${profile.level}",
                             fontSize = 16.sp,
@@ -275,6 +287,7 @@ fun ProfileCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    //show progress bar
                     ProgressBar(currentProgress = currentProgress, maxProgress = 600f)
                 }
             }
@@ -282,13 +295,14 @@ fun ProfileCard(
     }
 }
 
+//Draw a pie chart for different plant types
 @Composable
 fun PieChart(
     data: List<Pair<Float, Color>>,
     modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
-        val total = data.sumOf { it.first.toDouble() }.toFloat().coerceAtLeast(1f)
+        val total = data.sumOf { it.first.toDouble() }.toFloat().coerceAtLeast(1f)// Ensure total is at least 1 to avoid division by zero
         var startAngle = -90f
         data.forEach { (value, color) ->
             val sweep = value / total * 360f
@@ -303,6 +317,7 @@ fun PieChart(
     }
 }
 
+//Main Profile page layout
 @Composable
 fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
@@ -327,12 +342,12 @@ fun ProfileScreen(authVM: AuthViewModel, onLogout: () -> Unit, modifier: Modifie
 
             Spacer(modifier = Modifier.height(30.dp))
 
-
             ViewsByPlantsCard()
         }
     }
 }
 
+//Plant view statistics section with pie chart and labels
 @Composable
 private fun ViewsByPlantsCard(
     viewModel: PlantViewModel = viewModel()
@@ -390,7 +405,9 @@ private fun ViewsByPlantsCard(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+
             Divider(color = Color(0xFFE2E2E2), thickness = 1.dp)
+
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
@@ -420,6 +437,7 @@ private fun ViewsByPlantsCard(
     }
 }
 
+//Row for each plant type and its count
 @Composable
 private fun DataRow(iconId: Int, label: String, value: String) {
     Row(
@@ -433,6 +451,7 @@ private fun DataRow(iconId: Int, label: String, value: String) {
             contentDescription = label,
             modifier = Modifier.size(12.dp)
         )
+
         Spacer(modifier = Modifier.width(4.dp))
 
         Text(
@@ -453,5 +472,3 @@ private fun DataRow(iconId: Int, label: String, value: String) {
         )
     }
 }
-
-

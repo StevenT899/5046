@@ -17,16 +17,19 @@ data class UserProfile(
     val level: String = ""
 )
 
+// UI state for profile loading
 sealed interface ProfileState {
-    data object Loading : ProfileState
-    data class Success(val profile: UserProfile) : ProfileState
-    data class Error(val message: String) : ProfileState
+    data object Loading : ProfileState// Indicates loading state
+    data class Success(val profile: UserProfile) : ProfileState// Success state with data
+    data class Error(val message: String) : ProfileState// Error state with message
 }
 
+// ViewModel to load and manage user profile data from Firebase
 class ProfileViewModel : ViewModel() {
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()// Firebase Auth
+    private val firestore = FirebaseFirestore.getInstance()// Firebase Firestore
 
+    // StateFlow for user's current activity progress
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState: StateFlow<ProfileState> = _profileState
 
@@ -34,13 +37,14 @@ class ProfileViewModel : ViewModel() {
     val currentProgress: StateFlow<Float> = _currentProgress
 
     companion object {
-        const val MAX_PROGRESS = 600f
+        const val MAX_PROGRESS = 600f// Cap the maximum progress value
     }
 
     init {
-        loadUserProfile()
+        loadUserProfile()// Automatically load profile on init
     }
 
+    // Load the user's profile from Firestore
     fun loadUserProfile() = viewModelScope.launch {
         _profileState.value = ProfileState.Loading
 
@@ -58,9 +62,11 @@ class ProfileViewModel : ViewModel() {
                 .await()
 
             if (doc.exists()) {
+                // Load activity count and clamp it to max
                 val activities = doc.getLong("activities")?.toFloat() ?: 0f
                 _currentProgress.value = activities.coerceIn(0f, MAX_PROGRESS)
 
+                // Parse profile fields
                 val profile = UserProfile(
                     name = doc.getString("name") ?: "",
                     phone = doc.getString("phone") ?: "",
