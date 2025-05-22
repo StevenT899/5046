@@ -47,11 +47,11 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     val base64Image = Base64.encodeToString(it, Base64.DEFAULT)
                     plantMap["image"] = base64Image
                 }
-                // 等待Firebase写入完成
+                // Waiting for Firebase write to complete.
                 firestore.collection("plants")
                     .add(plantMap)
                     .await()
-                // Firebase写入成功后再刷新reminder
+                // Refresh the reminder after Firebase write is successful.
                 homeViewModel?.loadReminders()
             } catch (e: Exception) {
                 Log.e("PlantViewModel", "Exception occurred while saving to Firestore: ${e.message}", e)
@@ -59,7 +59,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val allPlants: Flow<List<Plant>> = 
+    val allPlants: Flow<List<Plant>> =
         auth.currentUser?.let {
             plantDao.getUserPlants(it.uid)
         } ?: plantDao.getAllPlants()
@@ -81,13 +81,13 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     document.reference.delete().await()
                 }
 
-                // 同步删除plantReminders中的对应文档
+                // Synchronously delete the corresponding document in plantReminders.
                 firestore.collection("users")
                     .document(plant.userId)
                     .collection("plantReminders")
                     .document(querySnapshot.documents.firstOrNull()?.id ?: plant.name)
                     .delete()
-                // Firebase删除成功后再刷新reminder
+                // Refresh the reminder after Firebase write is successful.
                 homeViewModel?.loadReminders()
             } catch (e: Exception) {
                 e.printStackTrace()

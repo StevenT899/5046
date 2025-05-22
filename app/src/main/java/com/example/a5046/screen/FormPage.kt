@@ -181,7 +181,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
 
                         Log.d("FormScreen", "Inserting plant: ${newPlant}")
                         
-                        // Insert plant to both Room and Firestore，并刷新reminder
+                        // Insert plant to both Room and Firestore, and refresh reminder
                         viewModel.insertPlant(newPlant, homeViewModel)
 
                         // Clear form fields
