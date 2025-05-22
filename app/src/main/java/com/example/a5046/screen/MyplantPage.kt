@@ -48,7 +48,8 @@ import com.example.a5046.viewmodel.PlantViewModel
 
 @Composable
 fun MyPlant(
-    viewModel: PlantViewModel = viewModel()
+    viewModel: PlantViewModel = viewModel(),
+    homeViewModel: com.example.a5046.viewmodel.HomeViewModel = viewModel()
 ) {
     val plantList by viewModel.allPlants.collectAsState(initial = emptyList())
     Surface(
@@ -77,7 +78,7 @@ fun MyPlant(
                 items(plantList) { plant ->
                     CustomPlantCard(
                         plant = plant,
-                        onDelete = viewModel::deletePlant
+                        onDelete = { viewModel.deletePlant(it, homeViewModel) }
                     )
                 }
             }

@@ -12,38 +12,58 @@ class PlantApplication : Application() {
         super.onCreate()
     }
 
+//    fun setupWorkManager() {
+//        val constraints = Constraints.Builder()
+//            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .build()
+//
+//        // Calculate delay until next midnight
+//        val calendar = Calendar.getInstance()
+//        calendar.add(Calendar.DAY_OF_YEAR, 1)
+//        calendar.set(Calendar.HOUR_OF_DAY, 0)
+//        calendar.set(Calendar.MINUTE, 0)
+//        calendar.set(Calendar.SECOND, 0)
+//        calendar.set(Calendar.MILLISECOND, 0)
+//        val delay = calendar.timeInMillis - System.currentTimeMillis()
+//
+//        // Get current user's uid
+//        val uid = FirebaseAuth.getInstance().currentUser?.uid
+//        if (uid != null) {
+//            val inputData = workDataOf("uid" to uid)
+//
+//            val reminderWorkRequest = PeriodicWorkRequestBuilder<PlantReminderWorker>(
+//                1, TimeUnit.MINUTES
+//            )
+//                .setConstraints(constraints)
+//                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+//                .setInputData(inputData)
+//                .build()
+//
+//            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//                "plant_reminder_work",
+//                ExistingPeriodicWorkPolicy.KEEP,
+//                reminderWorkRequest
+//            )
+//        }
+//    }
+
+
     fun setupWorkManager() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        // Calculate delay until next midnight
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val delay = calendar.timeInMillis - System.currentTimeMillis()
-
-        // Get current user's uid
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid != null) {
             val inputData = workDataOf("uid" to uid)
 
-            val reminderWorkRequest = PeriodicWorkRequestBuilder<PlantReminderWorker>(
-                24, TimeUnit.HOURS
-            )
+            // 改为 OneTimeWorkRequest：立即执行一次任务
+            val testWorkRequest = OneTimeWorkRequestBuilder<PlantReminderWorker>()
                 .setConstraints(constraints)
-                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                 .setInputData(inputData)
                 .build()
 
-            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "plant_reminder_work",
-                ExistingPeriodicWorkPolicy.KEEP,
-                reminderWorkRequest
-            )
+            WorkManager.getInstance(this).enqueue(testWorkRequest)
         }
     }
 } 

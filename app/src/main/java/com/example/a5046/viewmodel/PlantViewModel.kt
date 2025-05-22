@@ -26,59 +26,45 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
     private val currentUserId: String
         get() = auth.currentUser?.uid ?: ""
 
-    fun insertPlant(plant: Plant) {
+    fun insertPlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
             // Save to Room database
             plantDao.insertPlant(plant)
 
             // Save to Firestore
-            saveToFirestore(plant)
-        }
-    }
-
-    private suspend fun saveToFirestore(plant: Plant) {
-        try {
-            // Create Firestore document data
-            val plantMap = hashMapOf(
-                "name" to plant.name,
-                "plantingDate" to plant.plantingDate,
-                "plantType" to plant.plantType,
-                "wateringFrequency" to plant.wateringFrequency,
-                "fertilizingFrequency" to plant.fertilizingFrequency,
-                "lastWateredDate" to plant.lastWateredDate,
-                "lastFertilizedDate" to plant.lastFertilizedDate,
-                "userId" to plant.userId
-            )
-
-            // Convert image to Base64 if available
-            plant.image?.let {
-                val base64Image = Base64.encodeToString(it, Base64.DEFAULT)
-                plantMap["image"] = base64Image
+            try {
+                val plantMap = hashMapOf(
+                    "name" to plant.name,
+                    "plantingDate" to plant.plantingDate,
+                    "plantType" to plant.plantType,
+                    "wateringFrequency" to plant.wateringFrequency,
+                    "fertilizingFrequency" to plant.fertilizingFrequency,
+                    "lastWateredDate" to plant.lastWateredDate,
+                    "lastFertilizedDate" to plant.lastFertilizedDate,
+                    "userId" to plant.userId
+                )
+                plant.image?.let {
+                    val base64Image = Base64.encodeToString(it, Base64.DEFAULT)
+                    plantMap["image"] = base64Image
+                }
+                // 等待Firebase写入完成
+                firestore.collection("plants")
+                    .add(plantMap)
+                    .await()
+                // Firebase写入成功后再刷新reminder
+                homeViewModel?.loadReminders()
+            } catch (e: Exception) {
+                Log.e("PlantViewModel", "Exception occurred while saving to Firestore: ${e.message}", e)
             }
-
-            Log.d("PlantViewModel", "Starting to save plant to Firestore: ${plant.name}")
-
-            // Store data in Firestore
-            firestore.collection("plants")
-                .add(plantMap)
-                .addOnSuccessListener { documentReference ->
-                    Log.d("PlantViewModel", "Plant successfully saved to Firestore, ID: ${documentReference.id}")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("PlantViewModel", "Failed to save plant to Firestore: ${e.message}", e)
-                }
-        } catch (e: Exception) {
-            Log.e("PlantViewModel", "Exception occurred while saving to Firestore: ${e.message}", e)
         }
     }
-
 
     val allPlants: Flow<List<Plant>> = 
         auth.currentUser?.let {
             plantDao.getUserPlants(it.uid)
         } ?: plantDao.getAllPlants()
 
-    fun deletePlant(plant: Plant) {
+    fun deletePlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
             // Delete from Room database
             plantDao.delete(plant)
@@ -101,6 +87,8 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     .collection("plantReminders")
                     .document(querySnapshot.documents.firstOrNull()?.id ?: plant.name)
                     .delete()
+                // Firebase删除成功后再刷新reminder
+                homeViewModel?.loadReminders()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

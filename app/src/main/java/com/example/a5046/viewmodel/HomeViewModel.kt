@@ -17,6 +17,7 @@ import java.io.IOException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
+import android.util.Log
 
 data class UserData(val name: String = "", val level: String = "")
 
@@ -116,27 +117,38 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val userId = auth.currentUser?.uid ?: return@launch
-                val remindersSnapshot = firestore.collection("users")
-                    .document(userId)
-                    .collection("plantReminders")
+                val today = LocalDate.now()
+                val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
+                val plantsSnapshot = firestore.collection("plants")
+                    .whereEqualTo("userId", userId)
                     .get()
                     .await()
-
-                val reminders = remindersSnapshot.documents.mapNotNull { doc ->
-                    val plantName = doc.getString("plantName") ?: return@mapNotNull null
-                    val needWater = doc.getBoolean("needWater") ?: false
-                    val needFertilize = doc.getBoolean("needFertilize") ?: false
-                    PlantReminder(
-                        id = doc.id,
-                        plantName = plantName,
-                        needWater = needWater,
-                        needFertilize = needFertilize
-                    )
+                val reminders = plantsSnapshot.documents.mapNotNull { doc ->
+                    val plantName = doc.getString("name") ?: return@mapNotNull null
+                    val lastWateredStr = doc.getString("lastWateredDate")
+                    val lastFertilizedStr = doc.getString("lastFertilizedDate")
+                    val waterFreq = doc.getString("wateringFrequency")?.toIntOrNull()
+                    val fertFreq = doc.getString("fertilizingFrequency")?.toIntOrNull()
+                    val needWater = if (!lastWateredStr.isNullOrEmpty() && waterFreq != null) {
+                        val lastWatered = LocalDate.parse(lastWateredStr, formatter)
+                        !lastWatered.plusDays(waterFreq.toLong()).isAfter(today)
+                    } else false
+                    val needFertilize = if (!lastFertilizedStr.isNullOrEmpty() && fertFreq != null) {
+                        val lastFertilized = LocalDate.parse(lastFertilizedStr, formatter)
+                        !lastFertilized.plusDays(fertFreq.toLong()).isAfter(today)
+                    } else false
+                    if (needWater || needFertilize) {
+                        PlantReminder(
+                            id = doc.id,
+                            plantName = plantName,
+                            needWater = needWater,
+                            needFertilize = needFertilize
+                        )
+                    } else null
                 }
-
                 _plantReminders.value = reminders
             } catch (e: Exception) {
-                // handle error
+                Log.e("HomeViewModel", "Error loading reminders: ${e.message}", e)
             }
         }
     }
@@ -210,66 +222,34 @@ class HomeViewModel : ViewModel() {
         loadReminders()
     }
 
-    fun markWaterDone(reminderId: String, plantId: String) {
+    fun markWaterDone(plantId: String) {
         viewModelScope.launch {
             try {
-                val userId = auth.currentUser?.uid ?: return@launch
-                val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                // 更新提醒
-                val reminderRef = firestore.collection("users")
-                    .document(userId)
-                    .collection("plantReminders")
-                    .document(reminderId)
-                reminderRef.update("needWater", false).await()
-                // 更新植物
-                val plantRef = firestore.collection("users")
-                    .document(userId)
-                    .collection("plants")
+                val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
+                firestore.collection("plants")
                     .document(plantId)
-                plantRef.update("lastWateredDate", today).await()
-                // activities+1
+                    .update("lastWateredDate", today)
+                    .await()
                 addActivity()
-                // 检查是否两个都为false，如果是则删除文档
-                val doc = reminderRef.get().await()
-                val needFertilize = doc.getBoolean("needFertilize") ?: false
-                if (!needFertilize) {
-                    reminderRef.delete().await()
-                }
                 loadReminders()
             } catch (e: Exception) {
-                // handle error
+                Log.e("HomeViewModel", "Error marking water done: ", e)
             }
         }
     }
 
-    fun markFertilizeDone(reminderId: String, plantId: String) {
+    fun markFertilizeDone(plantId: String) {
         viewModelScope.launch {
             try {
-                val userId = auth.currentUser?.uid ?: return@launch
-                val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                // 更新提醒
-                val reminderRef = firestore.collection("users")
-                    .document(userId)
-                    .collection("plantReminders")
-                    .document(reminderId)
-                reminderRef.update("needFertilize", false).await()
-                // 更新植物
-                val plantRef = firestore.collection("users")
-                    .document(userId)
-                    .collection("plants")
+                val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
+                firestore.collection("plants")
                     .document(plantId)
-                plantRef.update("lastFertilizedDate", today).await()
-                // activities+1
+                    .update("lastFertilizedDate", today)
+                    .await()
                 addActivity()
-                // 检查是否两个都为false，如果是则删除文档
-                val doc = reminderRef.get().await()
-                val needWater = doc.getBoolean("needWater") ?: false
-                if (!needWater) {
-                    reminderRef.delete().await()
-                }
                 loadReminders()
             } catch (e: Exception) {
-                // handle error
+                Log.e("HomeViewModel", "Error marking fertilize done: ", e)
             }
         }
     }

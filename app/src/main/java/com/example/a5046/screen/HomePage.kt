@@ -540,10 +540,10 @@ fun HomeScreen(
                     showDialog = false
                     if (dialogType == "water") {
                         waterDoneMap[dialogReminderId] = true
-                        homeViewModel.markWaterDone(dialogReminderId, dialogPlantId)
+                        homeViewModel.markWaterDone(dialogReminderId)
                     } else if (dialogType == "fertilize") {
                         fertilizeDoneMap[dialogReminderId] = true
-                        homeViewModel.markFertilizeDone(dialogReminderId, dialogPlantId)
+                        homeViewModel.markFertilizeDone(dialogReminderId)
                     }
                 }) {
                     Text("Confirm")

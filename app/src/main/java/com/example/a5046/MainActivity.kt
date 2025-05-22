@@ -16,5 +16,6 @@ class MainActivity : ComponentActivity() {
                 MainNavigation()
             }
         }
+        (application as PlantApplication).setupWorkManager()
     }
 }

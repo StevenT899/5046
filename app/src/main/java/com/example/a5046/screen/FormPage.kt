@@ -36,6 +36,9 @@ import com.example.a5046.viewmodel.PlantViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
 import java.util.*
+import com.example.a5046.viewmodel.HomeViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
     val stream = ByteArrayOutputStream()
@@ -61,14 +64,15 @@ fun uriToBitmap(context: android.content.Context, uri: Uri): Bitmap? {
 @Composable
 fun FormScreen(modifier: Modifier = Modifier) {
     val viewModel: PlantViewModel = viewModel()
+    val homeViewModel: HomeViewModel = viewModel()
 
     var plantName by remember { mutableStateOf("") }
-    var plantingDate by remember { mutableStateOf("") }
+    var plantingDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))) }
     var plantType by remember { mutableStateOf("") }
     var wateringFrequency by remember { mutableStateOf("") }
     var fertilizingFrequency by remember { mutableStateOf("") }
-    var lastWateredDate by remember { mutableStateOf("") }
-    var lastFertilizedDate by remember { mutableStateOf("") }
+    var lastWateredDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))) }
+    var lastFertilizedDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     val plantTypes = listOf("Flower", "Vegetable", "Fruit", "Herb", "Other")
@@ -177,17 +181,17 @@ fun FormScreen(modifier: Modifier = Modifier) {
 
                         Log.d("FormScreen", "Inserting plant: ${newPlant}")
                         
-                        // Insert plant to both Room and Firestore
-                        viewModel.insertPlant(newPlant)
+                        // Insert plant to both Room and Firestore，并刷新reminder
+                        viewModel.insertPlant(newPlant, homeViewModel)
 
                         // Clear form fields
                         plantName = ""
-                        plantingDate = ""
+                        plantingDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         plantType = ""
                         wateringFrequency = ""
                         fertilizingFrequency = ""
-                        lastWateredDate = ""
-                        lastFertilizedDate = ""
+                        lastWateredDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
+                        lastFertilizedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         imageUri = null
                         
                         Toast.makeText(context, "Plant saved to your collection!", Toast.LENGTH_SHORT).show()

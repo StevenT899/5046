@@ -23,9 +23,8 @@ class PlantReminderWorker(
         val today = LocalDate.now()
 
         try {
-            val snapshot = firestore.collection("users")
-                .document(userId)
-                .collection("plants")
+            val snapshot = firestore.collection("plants")
+                .whereEqualTo("userId", userId)
                 .get()
                 .await()
 
@@ -35,8 +34,6 @@ class PlantReminderWorker(
                 val lastFertilizedStr = doc.getString("lastFertilizedDate")
                 val waterInterval = doc.getString("wateringFrequency")?.toIntOrNull()
                 val fertilizeInterval = doc.getString("fertilizingFrequency")?.toIntOrNull()
-
-
 
                 val needWater = if (!lastWateredStr.isNullOrEmpty() && waterInterval != null) {
                     val lastWatered = LocalDate.parse(lastWateredStr, formatter)
@@ -73,9 +70,10 @@ class PlantReminderWorker(
                     }
                 }
             }
+            Log.d("PlantReminderWorker", "🚀 Worker triggered immediately!")
             return Result.success()
         } catch (e: Exception) {
-            Log.e("ReminderWorker", "Error: ${e.message}", e)
+            Log.e("ReminderWorker", "Error in reminder check: ${e.message}", e)
             return Result.failure()
         }
     }
