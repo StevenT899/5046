@@ -89,7 +89,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
     var fertilizingFrequencyError by remember { mutableStateOf<String?>(null) }
     var hasAttemptedSubmit by remember { mutableStateOf(false) }
 
-    val plantTypes = listOf("Flower", "Vegetable", "Fruit", "Herb", "Other")
+    val plantTypes = listOf("Flower", "Vegetable", "Fruit", "Herb")
     val frequencyOptions = listOf("1", "2", "3", "5", "7", "10", "14")
 
     val context = LocalContext.current
