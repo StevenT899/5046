@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
+//Reference from AI
 sealed interface SubmitState {
     data object Idle : SubmitState
     data object Loading : SubmitState
@@ -53,6 +53,7 @@ class UserInfoViewModel : ViewModel() {
         level: String
     ) = viewModelScope.launch {
         // Validate required fields
+        //Reference from AI
         if (name.isBlank() || phone.isBlank() || age.isBlank() || gender.isBlank() || level.isBlank()) {
             _submitState.value = SubmitState.Error("All fields are required")
             return@launch

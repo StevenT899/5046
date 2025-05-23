@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter
 /**
  * Background worker: checks each user plant and creates/updates a reminder when watering or fertilizing is due.
  */
+//Reference from AI
 class PlantReminderWorker(
     private val context: Context,
     params: WorkerParameters

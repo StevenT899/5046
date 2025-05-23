@@ -22,6 +22,7 @@ sealed interface WeatherState {
     data class Error(val message: String) : WeatherState
 }
 //Retrofit API definition
+
 interface WeatherApi {
     @GET("data/2.5/weather")
     suspend fun getWeather(
