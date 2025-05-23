@@ -9,7 +9,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
+/**
+ * Background worker: checks each user plant and creates/updates a reminder when watering or fertilizing is due.
+ */
 class PlantReminderWorker(
     private val context: Context,
     params: WorkerParameters
@@ -44,7 +46,7 @@ class PlantReminderWorker(
                     val lastFertilized = LocalDate.parse(lastFertilizedStr, formatter)
                     !lastFertilized.plusDays(fertilizeInterval.toLong()).isAfter(today)
                 } else false
-
+// Only update Firestore if the “need” state changed to avoid redundant writes.
                 if (needWater || needFertilize) {
                     val reminderDocRef = firestore.collection("users")
                         .document(userId)

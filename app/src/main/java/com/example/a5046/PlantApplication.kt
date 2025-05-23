@@ -57,7 +57,7 @@ class PlantApplication : Application() {
         if (uid != null) {
             val inputData = workDataOf("uid" to uid)
 
-            // 改为 OneTimeWorkRequest：立即执行一次任务
+            // Change to OneTimeWorkRequest: Execute the task immediately once
             val testWorkRequest = OneTimeWorkRequestBuilder<PlantReminderWorker>()
                 .setConstraints(constraints)
                 .setInputData(inputData)

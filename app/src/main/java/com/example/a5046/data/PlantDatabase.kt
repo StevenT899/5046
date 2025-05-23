@@ -11,19 +11,13 @@ import androidx.room.RoomDatabase
  */
 @Database(entities = [Plant::class], version = 2, exportSchema = false)
 abstract class PlantDatabase : RoomDatabase() {
-    /**
-     * Abstract method to get the DAO (Data Access Object) for Plant.
-     */
+
     abstract fun plantDao(): PlantDao
 
     companion object {
         // Volatile ensures that the INSTANCE is visible to all threads immediately
         @Volatile private var INSTANCE: PlantDatabase? = null
 
-        /**
-         * Returns the singleton instance of the database.
-         * If it doesn't exist, it builds one using Room.
-         */
         fun getDatabase(context: Context): PlantDatabase {
             // Double-checked locking to ensure thread safety
             return INSTANCE ?: synchronized(this) {

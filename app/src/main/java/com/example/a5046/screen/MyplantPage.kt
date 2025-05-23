@@ -43,34 +43,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.asImageBitmap
 import com.example.a5046.viewmodel.PlantViewModel
 
-
-
-
+// Display the "My Plant" screen listing all user-added plants
 @Composable
 fun MyPlant(
     viewModel: PlantViewModel = viewModel(),
     homeViewModel: com.example.a5046.viewmodel.HomeViewModel = viewModel()
 ) {
+    // Observe all plants from ViewModel
     val plantList by viewModel.allPlants.collectAsState(initial = emptyList())
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFF1F7F5)
+        color = Color(0xFFF1F7F5)// Background color
     ) {
-
-
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
+            // Screen title
             Text(
                 text = "My Plant",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
+
             Spacer(modifier = Modifier.height(18.dp))
 
+            // Scrollable list of plant cards
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -86,13 +85,16 @@ fun MyPlant(
     }
 }
 
+// Custom card showing each plant's details
 @Composable
 fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
+    // Convert image byte array to bitmap (if available)
     val bitmap = remember(plant.image) {
         plant.image?.let { bytes ->
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         }
     }
+
     Card(
         shape = RoundedCornerShape(4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -105,6 +107,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
             ) {
+                // Plant image or placeholder icon
                 if (bitmap != null) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
@@ -119,8 +122,12 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         tint = Color.Unspecified
                     )
                 }
+
                 Spacer(modifier = Modifier.width(15.dp))
+
+                // Text and info column
                 Column(modifier = Modifier.fillMaxWidth(0.88f).padding(top = 8.dp)) {
+                    // Plant name
                     Text(
                         text = plant.name,
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -129,13 +136,19 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
+
+                    // Plant type
                     Text(
                         text = "Type: ${plant.plantType}",
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
+
                     Spacer(modifier = Modifier.height(14.dp))
+
+                    // Planting date row
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = R.drawable.date),
@@ -143,14 +156,18 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
+
                         Spacer(modifier = Modifier.width(6.dp))
+
                         Text(
                             text = "Planting data: ${plant.plantingDate}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     //fertilize
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -159,7 +176,9 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
+
                         Spacer(modifier = Modifier.width(6.dp))
+
                         Text(
                             text = "Fertilize every ${plant.fertilizingFrequency} days",
                             style = MaterialTheme.typography.bodySmall,
@@ -167,6 +186,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+
                     // watering
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -175,7 +195,9 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                             modifier = Modifier.size(20.dp),
                             tint = Color.Unspecified
                         )
+
                         Spacer(modifier = Modifier.width(6.dp))
+
                         Text(
                             text = "Water every ${plant.wateringFrequency} days",
                             style = MaterialTheme.typography.bodySmall,
@@ -183,6 +205,8 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         )
                     }
                 }
+
+                //Delete icon in top right
                 Icon(
                     painter = painterResource(id = R.drawable.close),
                     contentDescription = "Delete",
@@ -192,7 +216,7 @@ fun CustomPlantCard(plant: Plant, onDelete: (Plant) -> Unit) {
                         .align(Alignment.Top)
                         .offset(x = (-8).dp, y = (6).dp)
                         .clickable {
-                            onDelete(plant)//click function
+                            onDelete(plant)//click function,Trigger delete callback
                         },
                     tint = Color.Unspecified
                 )

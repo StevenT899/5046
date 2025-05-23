@@ -19,27 +19,29 @@ import android.util.Patterns
 
 @Composable
 fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInClick: () -> Unit) {
+//    auth state listener
     val authState by authVM.state.collectAsState()
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) onRegisterSuccess()
     }
-
+//form state
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmVisible by remember { mutableStateOf(false) }
-    
+//    Error messages (null = no error)
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
+//    validation helpers
     fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
-
+    //    Validate all inputs.
     fun validateInputs(): Boolean {
         var isValid = true
-        
+// Email validation
         if (email.isBlank()) {
             emailError = "Email cannot be empty"
             isValid = false
@@ -49,12 +51,15 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
         } else {
             emailError = null
         }
-
-        if (password != confirmPassword) {
-            passwordError = "Passwords do not match"
-            isValid = false
-        } else if (password.isBlank()) {
+// Password + confirm validation
+        if (password.isBlank()) {
             passwordError = "Password cannot be empty"
+            isValid = false
+        } else if (password.length < 6) {
+            passwordError = "Password must be at least 6 characters long"
+            isValid = false
+        } else if (password != confirmPassword) {
+            passwordError = "Passwords do not match"
             isValid = false
         } else {
             passwordError = null
@@ -75,13 +80,14 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             verticalArrangement = Arrangement.Center
         ) {
             Text(
+//                title
                 text = "Create your account",
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-
+//            Email field
             Text(
                 text = "Email",
                 style = MaterialTheme.typography.titleMedium,
@@ -91,10 +97,10 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { 
+                onValueChange = {
                     email = it
                     if (emailError != null) {
-                        emailError = null
+                        emailError = null // clear error while typing
                     }
                 },
                 label = { Text("Enter your email") },
@@ -112,7 +118,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
                     .align(Alignment.Start)
                     .fillMaxWidth()
             )
-
+//            Password field
             Text(
                 text = "Password",
                 style = MaterialTheme.typography.titleMedium,
@@ -122,7 +128,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = password,
-                onValueChange = { 
+                onValueChange = {
                     password = it
                     if (passwordError != null) {
                         passwordError = null
@@ -142,7 +148,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
                     }
                 }
             )
-
+//            Confirm Password field
             Text(
                 text = "Confirm Password",
                 style = MaterialTheme.typography.titleMedium,
@@ -152,7 +158,7 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { 
+                onValueChange = {
                     confirmPassword = it
                     if (passwordError != null) {
                         passwordError = null
@@ -182,11 +188,13 @@ fun RegisterScreen(authVM: AuthViewModel,onRegisterSuccess: () -> Unit,onSignInC
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
+//            Sign-up button
             Button(
                 onClick = {
                     if (validateInputs()) {
-                    authVM.signUpEmail(email.trim(), password)
+                        //reference from AI
+                        // call ViewModel registration
+                        authVM.signUpEmail(email.trim(), password)
                     }
                 },
                 modifier = Modifier

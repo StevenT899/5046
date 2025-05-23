@@ -15,13 +15,13 @@ data class WeatherData(
     val humidity: Int = 0,
     val uvIndex: Double = 0.0
 )
-
+//sealed class for UI state
 sealed interface WeatherState {
     data object Loading : WeatherState
     data class Success(val weatherData: WeatherData) : WeatherState
     data class Error(val message: String) : WeatherState
 }
-
+//Retrofit API definition
 interface WeatherApi {
     @GET("data/2.5/weather")
     suspend fun getWeather(
@@ -57,7 +57,7 @@ data class Weather(
 data class UVResponse(
     val value: Double
 )
-
+//Calls OpenWeatherMap APIs, combines temperature + humidity + UV index
 class WeatherViewModel : ViewModel() {
     private val _weatherState = MutableStateFlow<WeatherState>(WeatherState.Loading)
     val weatherState: StateFlow<WeatherState> = _weatherState
@@ -68,7 +68,8 @@ class WeatherViewModel : ViewModel() {
         .build()
 
     private val weatherApi = retrofit.create(WeatherApi::class.java)
-
+    //reference from AI
+    /** Fetch current weather + UV index, then update StateFlow */
     fun updateWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {

@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import android.util.Log
-
+//simple data holders
 data class UserData(val name: String = "", val level: String = "")
 
 data class PlantReminder(
@@ -45,7 +45,7 @@ sealed interface HomeState {
 class HomeViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
-
+//    StateFlows consumed by Composables
     private val _homeState = MutableStateFlow<HomeState>(HomeState.Loading)
     val homeState: StateFlow<HomeState> = _homeState
 
@@ -58,7 +58,7 @@ class HomeViewModel : ViewModel() {
     init {
         loadUserData()
     }
-
+//    user profile
     private fun loadUserData() = viewModelScope.launch {
         try {
             val userId = auth.currentUser?.uid
@@ -112,7 +112,7 @@ class HomeViewModel : ViewModel() {
             "Geocoder failed: ${e.message}"
         }
     }
-
+//    today’s reminders
     fun loadReminders() {
         viewModelScope.launch {
             try {
@@ -172,7 +172,7 @@ class HomeViewModel : ViewModel() {
 
         loadReminders()
     }
-
+//    debug helper
     fun debugRunReminderCheck() = viewModelScope.launch {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
         val today = LocalDate.now()
@@ -253,7 +253,7 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
-
+//activity counter
     fun addActivity() {
         viewModelScope.launch {
             try {

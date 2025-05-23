@@ -15,7 +15,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
@@ -34,12 +36,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a5046.data.Plant
 import com.example.a5046.ui.theme._5046Theme
 import com.example.a5046.viewmodel.PlantViewModel
+import com.example.a5046.viewmodel.HomeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
-import java.util.*
-import com.example.a5046.viewmodel.HomeViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 /** Convert Bitmap image to ByteArray for storage */
 fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
@@ -81,12 +83,46 @@ fun FormScreen(modifier: Modifier = Modifier) {
     var lastFertilizedDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
+    var plantNameError by remember { mutableStateOf<String?>(null) }
+    var plantTypeError by remember { mutableStateOf<String?>(null) }
+    var wateringFrequencyError by remember { mutableStateOf<String?>(null) }
+    var fertilizingFrequencyError by remember { mutableStateOf<String?>(null) }
+    var hasAttemptedSubmit by remember { mutableStateOf(false) }
+
     val plantTypes = listOf("Flower", "Vegetable", "Fruit", "Herb", "Other")
     val frequencyOptions = listOf("1", "2", "3", "5", "7", "10", "14")
 
     val context = LocalContext.current
 
-    // Image picker for selecting plant photo
+    val validatePlantName = {
+        plantNameError = when {
+            plantName.isBlank() -> "Plant name is required"
+            plantName.length > 36 -> "Plant name must be less than 36 characters"
+            else -> null
+        }
+    }
+
+    val validatePlantType = {
+        plantTypeError = if (plantType.isBlank()) "Plant type is required" else null
+    }
+
+    val validateWateringFrequency = {
+        wateringFrequencyError = if (wateringFrequency.isBlank()) "Watering frequency is required" else null
+    }
+
+    val validateFertilizingFrequency = {
+        fertilizingFrequencyError = if (fertilizingFrequency.isBlank()) "Fertilizing frequency is required" else null
+    }
+
+    val validateAllFields = {
+        validatePlantName()
+        validatePlantType()
+        validateWateringFrequency()
+        validateFertilizingFrequency()
+        plantNameError == null && plantTypeError == null &&
+                wateringFrequencyError == null && fertilizingFrequencyError == null
+    }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> imageUri = uri }
@@ -98,6 +134,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text("Add Plant", fontSize = 22.sp, fontWeight = FontWeight.Bold)
@@ -123,37 +160,67 @@ fun FormScreen(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Input fields: plant name, planting date, type, frequency, etc.
-            FormLabel("Plant Name(*)")
-            StyledTextField(plantName) { plantName = it }
+            PlantFormLabel("Plant Name(*)")
+            StyledTextField(
+                value = plantName,
+                onValueChange = {
+                    plantName = it
+                    if (hasAttemptedSubmit) validatePlantName()
+                },
+                error = plantNameError
+            )
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Planting Date(*)")
+                    PlantFormLabel("Planting Date(*)")
                     DatePickerField(plantingDate) { plantingDate = it }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Plant Type(*)")
-                    DropdownMenuField(plantTypes, plantType) { plantType = it }
+                    PlantFormLabel("Plant Type(*)")
+                    DropdownMenuField(
+                        options = plantTypes,
+                        selectedOption = plantType,
+                        onOptionSelected = {
+                            plantType = it
+                            if (hasAttemptedSubmit) validatePlantType()
+                        },
+                        error = plantTypeError
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
-            FormLabel("Watering Frequency(*)")
-            DropdownMenuField(frequencyOptions, wateringFrequency) { wateringFrequency = it }
+            PlantFormLabel("Watering Frequency(*)")
+            DropdownMenuField(
+                options = frequencyOptions,
+                selectedOption = wateringFrequency,
+                onOptionSelected = {
+                    wateringFrequency = it
+                    if (hasAttemptedSubmit) validateWateringFrequency()
+                },
+                error = wateringFrequencyError
+            )
             Spacer(modifier = Modifier.height(14.dp))
-            FormLabel("Fertilizing Frequency(*)")
-            DropdownMenuField(frequencyOptions, fertilizingFrequency) { fertilizingFrequency = it }
+            PlantFormLabel("Fertilizing Frequency(*)")
+            DropdownMenuField(
+                options = frequencyOptions,
+                selectedOption = fertilizingFrequency,
+                onOptionSelected = {
+                    fertilizingFrequency = it
+                    if (hasAttemptedSubmit) validateFertilizingFrequency()
+                },
+                error = fertilizingFrequencyError
+            )
 
             Spacer(modifier = Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Last Watered Date")
+                    PlantFormLabel("Last Watered Date")
                     DatePickerField(lastWateredDate) { lastWateredDate = it }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    FormLabel("Last Fertilized Date")
+                    PlantFormLabel("Last Fertilized Date")
                     DatePickerField(lastFertilizedDate) { lastFertilizedDate = it }
                 }
             }
@@ -162,6 +229,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
             // Submit button: validate and save form data
             Button(
                 onClick = {
+                    hasAttemptedSubmit = true
                     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
                     if (uid == null) {
@@ -169,16 +237,11 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         return@Button
                     }
 
-                    // Validate required fields
-                    if (plantName.isNotBlank() && plantingDate.isNotBlank() && plantType.isNotBlank()
-                        && wateringFrequency.isNotBlank() && fertilizingFrequency.isNotBlank()) {
-
-                        // Show loading toast
+                    if (validateAllFields()) {
                         Toast.makeText(context, "Saving plant data...", Toast.LENGTH_SHORT).show()
-                        
+
                         val imageBytes = imageUri?.let { uriToBitmap(context, it) }?.let { bitmapToByteArray(it) }
 
-                        // Create new Plant object
                         val newPlant = Plant(
                             name = plantName,
                             plantingDate = plantingDate,
@@ -192,11 +255,9 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         )
 
                         Log.d("FormScreen", "Inserting plant: ${newPlant}")
-                        
-                        // Insert plant to both Room and Firestore，and fresh reminder
+
                         viewModel.insertPlant(newPlant, homeViewModel)
 
-                        // Reset form after submission
                         plantName = ""
                         plantingDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         plantType = ""
@@ -205,10 +266,9 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         lastWateredDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         lastFertilizedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         imageUri = null
-                        
+                        hasAttemptedSubmit = false
+
                         Toast.makeText(context, "Plant saved to your collection!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Please fill all required fields (*)", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
@@ -221,9 +281,8 @@ fun FormScreen(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
-fun FormLabel(label: String) {
+fun PlantFormLabel(label: String) {
     Text(
         text = label,
         fontSize = 14.sp,
@@ -235,27 +294,44 @@ fun FormLabel(label: String) {
     )
 }
 
+
 @Composable
-fun StyledTextField(value: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color(0xFFBDBDBD),
-            unfocusedBorderColor = Color(0xFFBDBDBD)
+fun StyledTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    error: String? = null
+) {
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 56.dp),
+            shape = RoundedCornerShape(12.dp),
+            isError = error != null,
+            supportingText = {
+                if (error != null) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = if (error != null) MaterialTheme.colorScheme.error else Color(0xFFBDBDBD),
+                unfocusedBorderColor = if (error != null) MaterialTheme.colorScheme.error else Color(0xFFBDBDBD)
+            )
         )
-    )
+    }
 }
 
 @Composable
 fun DropdownMenuField(
     options: List<String>,
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    error: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -269,11 +345,20 @@ fun DropdownMenuField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .defaultMinSize(minHeight = 56.dp),
             shape = RoundedCornerShape(12.dp),
+            isError = error != null,
+            supportingText = {
+                if (error != null) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFBDBDBD),
-                unfocusedBorderColor = Color(0xFFBDBDBD)
+                focusedBorderColor = if (error != null) MaterialTheme.colorScheme.error else Color(0xFFBDBDBD),
+                unfocusedBorderColor = if (error != null) MaterialTheme.colorScheme.error else Color(0xFFBDBDBD)
             )
         )
 
@@ -349,7 +434,6 @@ fun DatePickerField(
         }.show()
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

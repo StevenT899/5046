@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 // Declare a Room Entity with table name "plant_table"
 @Entity(tableName = "plant_table")
 data class Plant(
-    // Primary key that auto-generates a unique ID for each plant
+
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     // Plant name (e.g., "Rose", "Basil")
     val name: String,

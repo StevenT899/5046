@@ -31,7 +31,7 @@ sealed interface AuthState {
     data object Success : AuthState
     data class Error(val msg: String) : AuthState
 }
-
+// reference from AI
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
@@ -112,13 +112,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = AuthState.Error(e.message ?: "Google login failed.")
         }
     }
-
+    //  the part coding reference from AI
     // Sync plants data from Firestore to local Room database
     private suspend fun syncPlantsFromFirestore(userId: String) {
         try {
             withContext(Dispatchers.IO) {
                 val plantDao = PlantDatabase.getDatabase(getApplication()).plantDao()
-                
+                //  the part coding reference from AI
                 // 1. Clear existing plants in Room database
                 plantDao.deleteAllUserPlants(userId)
                 
@@ -167,7 +167,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             Log.e("AuthViewModel", "Error synchronizing plants: ${e.message}", e)
         }
     }
-
+    //  the part coding reference from AI
     // Sign out
     fun signOut(context: Context) {
         val googleSignInClient = GoogleSignIn.getClient(
@@ -188,7 +188,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun markProfileCompleted() {
         _hasCompletedProfile.value = true
     }
-
+    //  the part coding reference from AI
+//    Check from Firestore whether the current user has already completed
     fun checkIfProfileCompleted(onResult: (Boolean) -> Unit) = viewModelScope.launch {
         val uid = auth.currentUser?.uid ?: return@launch
 
