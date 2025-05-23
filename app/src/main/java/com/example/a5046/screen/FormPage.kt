@@ -1,5 +1,6 @@
 package com.example.a5046.screen
 
+// Import necessary Android and Compose libraries
 import android.app.DatePickerDialog
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -40,12 +41,15 @@ import com.example.a5046.viewmodel.HomeViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/** Convert Bitmap image to ByteArray for storage */
 fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
     val stream = ByteArrayOutputStream()
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
     return stream.toByteArray()
 }
 
+
+/** Convert URI to Bitmap (supporting different Android versions) */
 fun uriToBitmap(context: android.content.Context, uri: Uri): Bitmap? {
     return try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -61,11 +65,13 @@ fun uriToBitmap(context: android.content.Context, uri: Uri): Bitmap? {
     }
 }
 
+/** Main form screen UI */
 @Composable
 fun FormScreen(modifier: Modifier = Modifier) {
     val viewModel: PlantViewModel = viewModel()
     val homeViewModel: HomeViewModel = viewModel()
 
+    // State variables for form fields
     var plantName by remember { mutableStateOf("") }
     var plantingDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))) }
     var plantType by remember { mutableStateOf("") }
@@ -80,6 +86,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
 
+    // Image picker for selecting plant photo
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> imageUri = uri }
@@ -96,6 +103,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
             Text("Add Plant", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(18.dp))
 
+            // Image card for plant photo upload
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,6 +123,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
                 }
             }
 
+            // Input fields: plant name, planting date, type, frequency, etc.
             FormLabel("Plant Name(*)")
             StyledTextField(plantName) { plantName = it }
             Spacer(modifier = Modifier.height(14.dp))
@@ -150,6 +159,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            // Submit button: validate and save form data
             Button(
                 onClick = {
                     val uid = FirebaseAuth.getInstance().currentUser?.uid
@@ -159,6 +169,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         return@Button
                     }
 
+                    // Validate required fields
                     if (plantName.isNotBlank() && plantingDate.isNotBlank() && plantType.isNotBlank()
                         && wateringFrequency.isNotBlank() && fertilizingFrequency.isNotBlank()) {
 
@@ -167,6 +178,7 @@ fun FormScreen(modifier: Modifier = Modifier) {
                         
                         val imageBytes = imageUri?.let { uriToBitmap(context, it) }?.let { bitmapToByteArray(it) }
 
+                        // Create new Plant object
                         val newPlant = Plant(
                             name = plantName,
                             plantingDate = plantingDate,
@@ -181,10 +193,10 @@ fun FormScreen(modifier: Modifier = Modifier) {
 
                         Log.d("FormScreen", "Inserting plant: ${newPlant}")
                         
-                        // Insert plant to both Room and Firestore，并刷新reminder
+                        // Insert plant to both Room and Firestore，and fresh reminder
                         viewModel.insertPlant(newPlant, homeViewModel)
 
-                        // Clear form fields
+                        // Reset form after submission
                         plantName = ""
                         plantingDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-M-d"))
                         plantType = ""

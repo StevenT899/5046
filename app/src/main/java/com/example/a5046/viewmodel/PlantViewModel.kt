@@ -16,23 +16,31 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 
+// ViewModel to handle plant data logic (Room + Firestore)
 class PlantViewModel(application: Application) : AndroidViewModel(application) {
 
+    // Local database access (Room)
     private val plantDao = PlantDatabase.getDatabase(application).plantDao()
+
+    // Firestore and FirebaseAuth instances
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // get current user ID
+    // Get the current user ID (empty string if not logged in)
     private val currentUserId: String
         get() = auth.currentUser?.uid ?: ""
 
+    /**
+     * Insert a plant into both Room and Firestore
+     * Optionally refresh reminders after successful save
+     */
     fun insertPlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
-            // Save to Room database
+            // Save plant to local Room DB
             plantDao.insertPlant(plant)
 
-            // Save to Firestore
             try {
+                // Prepare Firestore document data
                 val plantMap = hashMapOf(
                     "name" to plant.name,
                     "plantingDate" to plant.plantingDate,
@@ -43,15 +51,16 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     "lastFertilizedDate" to plant.lastFertilizedDate,
                     "userId" to plant.userId
                 )
+                // Add image as base64 string if available
                 plant.image?.let {
                     val base64Image = Base64.encodeToString(it, Base64.DEFAULT)
                     plantMap["image"] = base64Image
                 }
-                // 等待Firebase写入完成
+                // Save to Firestore
                 firestore.collection("plants")
                     .add(plantMap)
                     .await()
-                // Firebase写入成功后再刷新reminder
+                // After successful save, reload reminders
                 homeViewModel?.loadReminders()
             } catch (e: Exception) {
                 Log.e("PlantViewModel", "Exception occurred while saving to Firestore: ${e.message}", e)
@@ -59,18 +68,23 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Observe all plants for the current user (or all if no user found)
     val allPlants: Flow<List<Plant>> = 
         auth.currentUser?.let {
             plantDao.getUserPlants(it.uid)
         } ?: plantDao.getAllPlants()
 
+    /**
+     * Delete a plant from both Room and Firestore
+     * Also remove its corresponding reminder document
+     */
     fun deletePlant(plant: Plant, homeViewModel: com.example.a5046.viewmodel.HomeViewModel? = null) {
         viewModelScope.launch {
             // Delete from Room database
             plantDao.delete(plant)
 
-            // Delete from Firestore
             try {
+                // Find and delete from Firestore
                 val querySnapshot = firestore.collection("plants")
                     .whereEqualTo("name", plant.name)
                     .whereEqualTo("userId", plant.userId)
@@ -81,13 +95,13 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     document.reference.delete().await()
                 }
 
-                // 同步删除plantReminders中的对应文档
+                // Also delete reminder associated with this plant
                 firestore.collection("users")
                     .document(plant.userId)
                     .collection("plantReminders")
                     .document(querySnapshot.documents.firstOrNull()?.id ?: plant.name)
                     .delete()
-                // Firebase删除成功后再刷新reminder
+                // Refresh reminders after deletion
                 homeViewModel?.loadReminders()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -95,12 +109,17 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Data class for weekly summary used in bar chart */
     data class WeekFrequency(
-        val label: String,
-        val waterCount: Int,
-        val fertilizeCount: Int
+        val label: String,   // Week label (e.g. Week 1, Week 2...)
+        val waterCount: Int,  // Total watering frequency that week
+        val fertilizeCount: Int  // Total fertilizing frequency that week
     )
 
+    /**
+     * Weekly frequency aggregation logic.
+     * Groups all plants by their planting week and totals the water/fertilize values.
+     */
     val frequencyByWeek = allPlants
         .map { plantList ->
             val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
@@ -111,7 +130,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     plant to date
                 }.getOrNull()
             }
-
+            // Group by week and summarize frequencies
             val rawByWeek = plantsWithDate
                 .groupBy { (_, date) -> date.with(ChronoField.DAY_OF_WEEK, 1) }
                 .map { (weekStart, list) ->
@@ -122,7 +141,7 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
                 .sortedBy { it.label }
-
+            // Add "Week 1", "Week 2" labels
             rawByWeek.mapIndexed { idx, wf ->
                 wf.copy(label = "Week ${idx + 1}")
             }
@@ -133,7 +152,10 @@ class PlantViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-
+    /**
+     * Count number of plants per type (used in pie chart)
+     * Gets data from Room DAO and maps it to key-value format
+     */
     val plantCounts: StateFlow<Map<String, Int>> = (
         auth.currentUser?.let {
             plantDao.getUserCountsByType(it.uid)
