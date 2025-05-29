@@ -32,7 +32,7 @@ class PlantApplication : Application() {
 //            val inputData = workDataOf("uid" to uid)
 //
 //            val reminderWorkRequest = PeriodicWorkRequestBuilder<PlantReminderWorker>(
-//                1, TimeUnit.MINUTES
+//                  1, TimeUnit.DAYS
 //            )
 //                .setConstraints(constraints)
 //                .setInitialDelay(delay, TimeUnit.MILLISECONDS)

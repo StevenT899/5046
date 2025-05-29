@@ -18,7 +18,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import android.util.Log
-//simple data holders
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import kotlinx.coroutines.delay
+import androidx.work.workDataOf
+
+
 data class UserData(val name: String = "", val level: String = "")
 
 data class PlantReminder(
@@ -112,7 +119,7 @@ class HomeViewModel : ViewModel() {
             "Geocoder failed: ${e.message}"
         }
     }
-//    today’s reminders
+//    today's reminders
     fun loadReminders() {
         viewModelScope.launch {
             try {
@@ -173,52 +180,17 @@ class HomeViewModel : ViewModel() {
         loadReminders()
     }
 //    debug helper
-    fun debugRunReminderCheck() = viewModelScope.launch {
+    fun debugRunReminderCheck(context: Context) = viewModelScope.launch {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-        val today = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
-        val snapshot = FirebaseFirestore.getInstance()
-            .collection("plants")
-            .whereEqualTo("userId", uid)
-            .get()
-            .await()
 
-        for (doc in snapshot.documents) {
-            val name = doc.getString("name") ?: continue
-            val lastWateredStr = doc.getString("lastWateredDate")
-            val lastFertilizedStr = doc.getString("lastFertilizedDate")
-            val waterFreq = doc.getString("wateringFrequency")?.toIntOrNull()
-            val fertFreq = doc.getString("fertilizingFrequency")?.toIntOrNull()
+        val workRequest = OneTimeWorkRequestBuilder<PlantReminderWorker>()
+            .setInputData(workDataOf("uid" to uid))
+            .build()
 
-            val needWater = if (!lastWateredStr.isNullOrEmpty() && waterFreq != null) {
-                val lastWatered = LocalDate.parse(lastWateredStr, formatter)
-                !lastWatered.plusDays(waterFreq.toLong()).isAfter(today)
-            } else false
+        WorkManager.getInstance(context.applicationContext)
+            .enqueue(workRequest)
 
-            val needFertilize = if (!lastFertilizedStr.isNullOrEmpty() && fertFreq != null) {
-                val lastFertilized = LocalDate.parse(lastFertilizedStr, formatter)
-                !lastFertilized.plusDays(fertFreq.toLong()).isAfter(today)
-            } else false
-
-            if (needWater || needFertilize) {
-                val reminderDoc = FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(uid)
-                    .collection("plantReminders")
-                    .document(doc.id)
-
-                reminderDoc.set(
-                    mapOf(
-                        "plantName" to name,
-                        "needWater" to needWater,
-                        "needFertilize" to needFertilize,
-                        "isDone" to false,
-                        "timestamp" to System.currentTimeMillis()
-                    )
-                )
-            }
-        }
-
+        delay(2000)
         loadReminders()
     }
 
