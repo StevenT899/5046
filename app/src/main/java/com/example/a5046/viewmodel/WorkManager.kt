@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 /**
  * Background worker: checks each user plant and creates/updates a reminder when watering or fertilizing is due.
  */
-//Reference from AI
+
 class PlantReminderWorker(
     private val context: Context,
     params: WorkerParameters
@@ -47,6 +47,7 @@ class PlantReminderWorker(
                     val lastFertilized = LocalDate.parse(lastFertilizedStr, formatter)
                     !lastFertilized.plusDays(fertilizeInterval.toLong()).isAfter(today)
                 } else false
+
 // Only update Firestore if the “need” state changed to avoid redundant writes.
                 if (needWater || needFertilize) {
                     val reminderDocRef = firestore.collection("users")
@@ -73,7 +74,7 @@ class PlantReminderWorker(
                     }
                 }
             }
-            Log.d("PlantReminderWorker", "🚀 Worker triggered immediately!")
+            Log.d("PlantReminderWorker", " Worker triggered immediately!")
             return Result.success()
         } catch (e: Exception) {
             Log.e("ReminderWorker", "Error in reminder check: ${e.message}", e)

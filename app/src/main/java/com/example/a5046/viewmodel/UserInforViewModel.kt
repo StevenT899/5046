@@ -41,7 +41,7 @@ class UserInfoViewModel : ViewModel() {
                 _submitState.value = SubmitState.Success
             }
         } catch (e: Exception) {
-            // Silently handle the error as this is just an initial check
+
         }
     }
 

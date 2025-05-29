@@ -21,6 +21,7 @@ sealed class RecommendationState {
     data class Error(val message: String) : RecommendationState()
 }
 
+
 class RecommendationViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val _recommendationState = MutableStateFlow<RecommendationState>(RecommendationState.Loading)

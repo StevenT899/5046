@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -75,6 +77,7 @@ fun HomeScreen(
     val weatherState by weatherViewModel.weatherState.collectAsState()
     val recommendationState by recommendationViewModel.recommendationState.collectAsState()
     val reminders by homeViewModel.plantReminders.collectAsState(initial = emptyList())
+    var isRefreshing by remember { mutableStateOf(false) }
 
     // Track completion status for each event
     val waterDoneMap = remember { mutableStateMapOf<String, Boolean>() }
@@ -225,6 +228,32 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Daily Reminder", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(
+                            onClick = {
+                                isRefreshing = true
+                                homeViewModel.debugRunReminderCheck(context)
+                                coroutineScope.launch {
+                                    delay(2000)
+                                    isRefreshing = false
+                                }
+                            },
+                            enabled = !isRefreshing
+                        ) {
+                            if (isRefreshing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = Color(0xFFFF9800),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Refresh Reminders",
+                                    tint = Color(0xFFFF9800)
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
